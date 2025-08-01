@@ -22,9 +22,13 @@ async function startServer() {
     await prisma.$connect();
     console.log('✅ Connected to PostgreSQL database');
 
-    // Connect to Redis
-    await redisClient.connect();
-    console.log('✅ Connected to Redis');
+    // Connect to Redis (optional)
+    try {
+      await redisClient.connect();
+      console.log('✅ Connected to Redis');
+    } catch (error) {
+      console.log('⚠️  Redis not available, continuing without caching');
+    }
 
     // Start the server
     server.listen(PORT, () => {

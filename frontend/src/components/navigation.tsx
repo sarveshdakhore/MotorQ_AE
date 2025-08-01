@@ -2,13 +2,19 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/auth-context';
-import { LogOut, BarChart3, Settings, Home, Car } from 'lucide-react';
+import { LogOut, BarChart3, Settings, Home, Car, Bell, TrendingUp, AlertTriangle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { NotificationDropdown } from '@/components/notification-dropdown';
+import { notificationsApi } from '@/lib/notifications-api';
 
 export function Navigation() {
   const pathname = usePathname();
   const router = useRouter();
   const { logout } = useAuth();
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -27,11 +33,34 @@ export function Navigation() {
       icon: Car,
     },
     {
+      href: '/analytics',
+      label: 'Analytics',
+      icon: TrendingUp,
+    },
+    {
       href: '/maintenance',
       label: 'Maintenance',
       icon: Settings,
     },
   ];
+
+  // Fetch real notification count
+  useEffect(() => {
+    fetchNotificationCount();
+    // Set up interval to refresh notification count every 30 seconds
+    const interval = setInterval(fetchNotificationCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchNotificationCount = async () => {
+    try {
+      const count = await notificationsApi.getNotificationCount();
+      setNotificationCount(count.total);
+    } catch (error) {
+      console.error('Failed to fetch notification count:', error);
+      // Keep previous count on error
+    }
+  };
 
   return (
     <header className="bg-white shadow">
@@ -60,14 +89,45 @@ export function Navigation() {
               })}
             </nav>
           </div>
-          <Button
-            variant="outline"
-            onClick={handleLogout}
-            className="flex items-center"
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Logout
-          </Button>
+          
+          <div className="flex items-center space-x-4">
+            {/* Notification Button */}
+            <div className="relative">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative p-2"
+              >
+                <Bell className="h-5 w-5" />
+                {notificationCount > 0 && (
+                  <Badge 
+                    variant="destructive" 
+                    className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                  >
+                    {notificationCount > 9 ? '9+' : notificationCount}
+                  </Badge>
+                )}
+              </Button>
+              
+              {/* Notification Dropdown */}
+              {showNotifications && (
+                <NotificationDropdown 
+                  onClose={() => setShowNotifications(false)}
+                  onNotificationCountChange={setNotificationCount}
+                />
+              )}
+            </div>
+            
+            <Button
+              variant="outline"
+              onClick={handleLogout}
+              className="flex items-center"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
+          </div>
         </div>
       </div>
     </header>

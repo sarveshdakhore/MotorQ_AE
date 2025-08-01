@@ -14,11 +14,15 @@ import { SessionController } from './../controllers/SessionController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ParkingController } from './../controllers/ParkingController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { NotificationController } from './../controllers/NotificationController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { DashboardController } from './../controllers/DashboardController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { BillingController } from './../controllers/BillingController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { AuthController } from './../controllers/AuthController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { AnalyticsController } from './../controllers/AnalyticsController';
 import type { Request as ExRequest, Response as ExResponse, RequestHandler, Router } from 'express';
 
 
@@ -207,6 +211,16 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "NotificationResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "message": {"dataType":"string"},
+            "data": {"dataType":"any"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "DashboardStats": {
         "dataType": "refObject",
         "properties": {
@@ -333,6 +347,16 @@ const models: TsoaRoute.Models = {
             "success": {"dataType":"boolean","required":true},
             "message": {"dataType":"string","required":true},
             "user": {"ref":"AuthUser"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "AnalyticsResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "message": {"dataType":"string"},
+            "data": {"dataType":"any"},
         },
         "additionalProperties": false,
     },
@@ -1476,6 +1500,155 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsNotificationController_getNotifications: Record<string, TsoaRoute.ParameterSchema> = {
+                unreadOnly: {"in":"query","name":"unreadOnly","dataType":"boolean"},
+                type: {"in":"query","name":"type","dataType":"union","subSchemas":[{"dataType":"enum","enums":["overstay"]},{"dataType":"enum","enums":["revenue"]},{"dataType":"enum","enums":["system"]},{"dataType":"enum","enums":["maintenance"]}]},
+                limit: {"default":20,"in":"query","name":"limit","dataType":"double"},
+        };
+        app.get('/api/notifications',
+            ...(fetchMiddlewares<RequestHandler>(NotificationController)),
+            ...(fetchMiddlewares<RequestHandler>(NotificationController.prototype.getNotifications)),
+
+            async function NotificationController_getNotifications(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsNotificationController_getNotifications, request, response });
+
+                const controller = new NotificationController();
+
+              await templateService.apiHandler({
+                methodName: 'getNotifications',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsNotificationController_getNotificationCount: Record<string, TsoaRoute.ParameterSchema> = {
+        };
+        app.get('/api/notifications/count',
+            ...(fetchMiddlewares<RequestHandler>(NotificationController)),
+            ...(fetchMiddlewares<RequestHandler>(NotificationController.prototype.getNotificationCount)),
+
+            async function NotificationController_getNotificationCount(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsNotificationController_getNotificationCount, request, response });
+
+                const controller = new NotificationController();
+
+              await templateService.apiHandler({
+                methodName: 'getNotificationCount',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsNotificationController_markNotificationAsRead: Record<string, TsoaRoute.ParameterSchema> = {
+                notificationId: {"in":"path","name":"notificationId","required":true,"dataType":"string"},
+        };
+        app.post('/api/notifications/:notificationId/mark-read',
+            ...(fetchMiddlewares<RequestHandler>(NotificationController)),
+            ...(fetchMiddlewares<RequestHandler>(NotificationController.prototype.markNotificationAsRead)),
+
+            async function NotificationController_markNotificationAsRead(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsNotificationController_markNotificationAsRead, request, response });
+
+                const controller = new NotificationController();
+
+              await templateService.apiHandler({
+                methodName: 'markNotificationAsRead',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsNotificationController_markAllNotificationsAsRead: Record<string, TsoaRoute.ParameterSchema> = {
+        };
+        app.post('/api/notifications/mark-all-read',
+            ...(fetchMiddlewares<RequestHandler>(NotificationController)),
+            ...(fetchMiddlewares<RequestHandler>(NotificationController.prototype.markAllNotificationsAsRead)),
+
+            async function NotificationController_markAllNotificationsAsRead(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsNotificationController_markAllNotificationsAsRead, request, response });
+
+                const controller = new NotificationController();
+
+              await templateService.apiHandler({
+                methodName: 'markAllNotificationsAsRead',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsNotificationController_runOverstayDetection: Record<string, TsoaRoute.ParameterSchema> = {
+        };
+        app.post('/api/notifications/run-overstay-detection',
+            ...(fetchMiddlewares<RequestHandler>(NotificationController)),
+            ...(fetchMiddlewares<RequestHandler>(NotificationController.prototype.runOverstayDetection)),
+
+            async function NotificationController_runOverstayDetection(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsNotificationController_runOverstayDetection, request, response });
+
+                const controller = new NotificationController();
+
+              await templateService.apiHandler({
+                methodName: 'runOverstayDetection',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsDashboardController_getDashboardStats: Record<string, TsoaRoute.ParameterSchema> = {
         };
         app.get('/api/dashboard/stats',
@@ -1945,6 +2118,247 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'logout',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAnalyticsController_getRevenueAnalytics: Record<string, TsoaRoute.ParameterSchema> = {
+                period: {"default":"day","in":"query","name":"period","dataType":"union","subSchemas":[{"dataType":"enum","enums":["day"]},{"dataType":"enum","enums":["week"]},{"dataType":"enum","enums":["month"]}]},
+                startDate: {"in":"query","name":"startDate","dataType":"string"},
+                endDate: {"in":"query","name":"endDate","dataType":"string"},
+        };
+        app.get('/api/analytics/revenue',
+            ...(fetchMiddlewares<RequestHandler>(AnalyticsController)),
+            ...(fetchMiddlewares<RequestHandler>(AnalyticsController.prototype.getRevenueAnalytics)),
+
+            async function AnalyticsController_getRevenueAnalytics(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAnalyticsController_getRevenueAnalytics, request, response });
+
+                const controller = new AnalyticsController();
+
+              await templateService.apiHandler({
+                methodName: 'getRevenueAnalytics',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAnalyticsController_getSlotUtilizationAnalytics: Record<string, TsoaRoute.ParameterSchema> = {
+                period: {"default":"day","in":"query","name":"period","dataType":"union","subSchemas":[{"dataType":"enum","enums":["day"]},{"dataType":"enum","enums":["week"]},{"dataType":"enum","enums":["month"]}]},
+        };
+        app.get('/api/analytics/utilization',
+            ...(fetchMiddlewares<RequestHandler>(AnalyticsController)),
+            ...(fetchMiddlewares<RequestHandler>(AnalyticsController.prototype.getSlotUtilizationAnalytics)),
+
+            async function AnalyticsController_getSlotUtilizationAnalytics(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAnalyticsController_getSlotUtilizationAnalytics, request, response });
+
+                const controller = new AnalyticsController();
+
+              await templateService.apiHandler({
+                methodName: 'getSlotUtilizationAnalytics',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAnalyticsController_getPeakHoursAnalytics: Record<string, TsoaRoute.ParameterSchema> = {
+                period: {"default":"day","in":"query","name":"period","dataType":"union","subSchemas":[{"dataType":"enum","enums":["day"]},{"dataType":"enum","enums":["week"]},{"dataType":"enum","enums":["month"]}]},
+        };
+        app.get('/api/analytics/peak-hours',
+            ...(fetchMiddlewares<RequestHandler>(AnalyticsController)),
+            ...(fetchMiddlewares<RequestHandler>(AnalyticsController.prototype.getPeakHoursAnalytics)),
+
+            async function AnalyticsController_getPeakHoursAnalytics(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAnalyticsController_getPeakHoursAnalytics, request, response });
+
+                const controller = new AnalyticsController();
+
+              await templateService.apiHandler({
+                methodName: 'getPeakHoursAnalytics',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAnalyticsController_getVehicleTypeAnalytics: Record<string, TsoaRoute.ParameterSchema> = {
+                period: {"default":"day","in":"query","name":"period","dataType":"union","subSchemas":[{"dataType":"enum","enums":["day"]},{"dataType":"enum","enums":["week"]},{"dataType":"enum","enums":["month"]}]},
+        };
+        app.get('/api/analytics/vehicle-types',
+            ...(fetchMiddlewares<RequestHandler>(AnalyticsController)),
+            ...(fetchMiddlewares<RequestHandler>(AnalyticsController.prototype.getVehicleTypeAnalytics)),
+
+            async function AnalyticsController_getVehicleTypeAnalytics(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAnalyticsController_getVehicleTypeAnalytics, request, response });
+
+                const controller = new AnalyticsController();
+
+              await templateService.apiHandler({
+                methodName: 'getVehicleTypeAnalytics',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAnalyticsController_getOperationalMetrics: Record<string, TsoaRoute.ParameterSchema> = {
+                period: {"default":"day","in":"query","name":"period","dataType":"union","subSchemas":[{"dataType":"enum","enums":["day"]},{"dataType":"enum","enums":["week"]},{"dataType":"enum","enums":["month"]}]},
+        };
+        app.get('/api/analytics/operational-metrics',
+            ...(fetchMiddlewares<RequestHandler>(AnalyticsController)),
+            ...(fetchMiddlewares<RequestHandler>(AnalyticsController.prototype.getOperationalMetrics)),
+
+            async function AnalyticsController_getOperationalMetrics(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAnalyticsController_getOperationalMetrics, request, response });
+
+                const controller = new AnalyticsController();
+
+              await templateService.apiHandler({
+                methodName: 'getOperationalMetrics',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAnalyticsController_getOverstayAlerts: Record<string, TsoaRoute.ParameterSchema> = {
+        };
+        app.get('/api/analytics/overstay-alerts',
+            ...(fetchMiddlewares<RequestHandler>(AnalyticsController)),
+            ...(fetchMiddlewares<RequestHandler>(AnalyticsController.prototype.getOverstayAlerts)),
+
+            async function AnalyticsController_getOverstayAlerts(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAnalyticsController_getOverstayAlerts, request, response });
+
+                const controller = new AnalyticsController();
+
+              await templateService.apiHandler({
+                methodName: 'getOverstayAlerts',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAnalyticsController_getOverstayStats: Record<string, TsoaRoute.ParameterSchema> = {
+                periodDays: {"default":7,"in":"query","name":"periodDays","dataType":"double"},
+        };
+        app.get('/api/analytics/overstay-stats',
+            ...(fetchMiddlewares<RequestHandler>(AnalyticsController)),
+            ...(fetchMiddlewares<RequestHandler>(AnalyticsController.prototype.getOverstayStats)),
+
+            async function AnalyticsController_getOverstayStats(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAnalyticsController_getOverstayStats, request, response });
+
+                const controller = new AnalyticsController();
+
+              await templateService.apiHandler({
+                methodName: 'getOverstayStats',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAnalyticsController_getDashboardAnalytics: Record<string, TsoaRoute.ParameterSchema> = {
+                period: {"default":"day","in":"query","name":"period","dataType":"union","subSchemas":[{"dataType":"enum","enums":["day"]},{"dataType":"enum","enums":["week"]},{"dataType":"enum","enums":["month"]}]},
+        };
+        app.get('/api/analytics/dashboard',
+            ...(fetchMiddlewares<RequestHandler>(AnalyticsController)),
+            ...(fetchMiddlewares<RequestHandler>(AnalyticsController.prototype.getDashboardAnalytics)),
+
+            async function AnalyticsController_getDashboardAnalytics(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAnalyticsController_getDashboardAnalytics, request, response });
+
+                const controller = new AnalyticsController();
+
+              await templateService.apiHandler({
+                methodName: 'getDashboardAnalytics',
                 controller,
                 response,
                 next,
