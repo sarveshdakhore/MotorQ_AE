@@ -121,6 +121,6 @@ export const parkingApi = {
   // Register vehicle exit
   async registerVehicleExit(numberPlate: string): Promise<any> {
     const response = await axios.post(`${API_BASE_URL}/parking/exit`, { numberPlate });
-    return response.data.data;
+    return response.data; // Return the full response including success field
   },
 };

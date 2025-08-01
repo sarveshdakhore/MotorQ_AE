@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { slotsApi } from '@/lib/slots-api';
+import { formatToISTTimeOnly } from '@/lib/time-utils';
 import { 
   MapPin, 
   RefreshCw, 
@@ -164,7 +165,7 @@ export const SlotSelector = forwardRef<SlotSelectorRef, SlotSelectorProps>(({ ve
         </div>
         {lastUpdated && (
           <p className="text-sm text-gray-500">
-            Last updated: {lastUpdated.toLocaleTimeString()}
+            Last updated: {formatToISTTimeOnly(lastUpdated)} IST
           </p>
         )}
       </CardHeader>

@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatToISTDateTime } from '@/lib/time-utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -58,11 +59,7 @@ export function AssignmentResult({ result, onNewAssignment }: AssignmentResultPr
   };
 
   const formatEntryTime = (entryTime: string) => {
-    const date = new Date(entryTime);
-    return {
-      date: date.toLocaleDateString(),
-      time: date.toLocaleTimeString()
-    };
+    return formatToISTDateTime(entryTime);
   };
 
   const handlePrintReceipt = () => {

@@ -40,7 +40,7 @@ export function Navigation() {
           <div className="flex items-center space-x-8">
             <div className="flex items-center">
               <Home className="h-8 w-8 text-blue-600 mr-2" />
-              <h1 className="text-2xl font-bold text-gray-900">MotorQ</h1>
+              <h1 className="text-2xl font-bold text-gray-900">MOTORQ</h1>
             </div>
             <nav className="flex space-x-4">
               {navItems.map((item) => {

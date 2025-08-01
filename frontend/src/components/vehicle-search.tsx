@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { parkingApi, VehicleSearchResponse, QuickSearchResult } from '@/lib/parking-api';
 import { Search, MapPin, Clock, DollarSign, Car, Bike, Zap, Accessibility } from 'lucide-react';
 import { toast } from 'sonner';
+import { formatToISTDateTime } from '@/lib/time-utils';
 
 interface VehicleSearchProps {
   onVehicleFound?: (vehicle: VehicleSearchResponse) => void;
@@ -250,7 +251,7 @@ export function VehicleSearch({ onVehicleFound }: VehicleSearchProps) {
                     </div>
                   </div>
                   <div className="mt-3 text-sm text-gray-600">
-                    Entry Time: {new Date(searchResult.currentSession.entryTime).toLocaleString()}
+                    Entry Time: {formatToISTDateTime(searchResult.currentSession.entryTime).full} IST
                   </div>
                 </div>
               )}
@@ -269,7 +270,7 @@ export function VehicleSearch({ onVehicleFound }: VehicleSearchProps) {
                         <div className="flex items-center space-x-4 text-sm text-gray-600">
                           <span>{history.duration}</span>
                           <span>${history.billingAmount}</span>
-                          <span>{new Date(history.entryTime).toLocaleDateString()}</span>
+                          <span>{formatToISTDateTime(history.entryTime).date}</span>
                         </div>
                       </div>
                     ))}

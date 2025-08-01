@@ -14,6 +14,7 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { parkingApi, CurrentlyParkedVehicle } from '@/lib/parking-api';
+import { formatToISTDateTime, formatToISTTimeOnly } from '@/lib/time-utils';
 import { 
   Car, 
   Bike, 
@@ -293,7 +294,8 @@ export function CurrentSessions({ refreshTrigger }: CurrentSessionsProps) {
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          {new Date(session.entryTime).toLocaleString()}
+                          <div>{formatToISTDateTime(session.entryTime).full}</div>
+                          <div className="text-xs text-gray-400">IST</div>
                         </div>
                       </TableCell>
                     </TableRow>

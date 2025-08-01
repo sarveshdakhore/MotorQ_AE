@@ -11,6 +11,7 @@ import { Navigation } from '@/components/navigation';
 import { VehicleSearch } from '@/components/vehicle-search';
 import { CurrentSessions } from '@/components/current-sessions';
 import { dashboardApi, DashboardStats, RevenueStats, ActivityStats } from '@/lib/dashboard-api';
+import { formatToISTTimeOnly } from '@/lib/time-utils';
 import { 
   BarChart3, 
   DollarSign, 
@@ -37,7 +38,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [selectedView, setSelectedView] = useState<'overview' | 'search' | 'sessions'>('overview');
+  const [selectedView, setSelectedView] = useState<'overview' | 'search' | 'sessions' | 'history'>('overview');
 
   // Auth check removed - open access mode
   // useEffect(() => {
@@ -152,7 +153,7 @@ export default function DashboardPage() {
               <h1 className="text-3xl font-bold text-gray-900">Parking Dashboard</h1>
               <p className="text-gray-600 flex items-center mt-1">
                 <Clock className="h-4 w-4 mr-1" />
-                Last updated: {lastUpdated.toLocaleTimeString()}
+                Last updated: {formatToISTTimeOnly(lastUpdated)} IST
               </p>
             </div>
             <Button
@@ -198,6 +199,17 @@ export default function DashboardPage() {
             >
               <Activity className="h-4 w-4 mr-2 inline" />
               Current Sessions
+            </button>
+            <button
+              onClick={() => setSelectedView('history')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                selectedView === 'history'
+                  ? 'bg-white text-blue-600 shadow'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <Clock className="h-4 w-4 mr-2 inline" />
+              Past Sessions
             </button>
           </div>
 
@@ -396,7 +408,7 @@ export default function DashboardPage() {
                         {activityStats?.peakHours.slice(0, 12).map((hour) => (
                           <div key={hour.hour} className="text-center">
                             <div className="text-xs text-gray-500 mb-1">
-                              {hour.hour}:00
+                              {String(hour.hour).padStart(2, '0')}:00
                             </div>
                             <div className="h-16 bg-gray-100 rounded relative overflow-hidden">
                               <div
