@@ -121,17 +121,23 @@ export class AuthController extends Controller {
   @SuccessResponse(200, 'User information retrieved')
   @Response(401, 'Unauthorized')
   public async getCurrentUser(@Request() request: ExpressRequest): Promise<AuthResponse> {
-    // Extract token from Authorization header
+    // Extract token from Authorization header or cookies
+    let token: string | undefined;
+    
     const authHeader = request.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    } else if (request.cookies?.token) {
+      token = request.cookies.token;
+    }
+    
+    if (!token) {
       this.setStatus(401);
       return {
         success: false,
         message: 'No authorization token provided'
       };
     }
-
-    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
     const decoded = authService.verifyToken(token);
     
     if (!decoded) {

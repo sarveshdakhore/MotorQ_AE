@@ -81,6 +81,28 @@ export class SlotController extends Controller {
   }
 
   /**
+   * Get slot availability map
+   * @summary Get visual representation of slot availability
+   */
+  @Get('/availability-map')
+  @SuccessResponse(200, 'Availability map retrieved successfully')
+  public async getAvailabilityMap(): Promise<SlotResponse> {
+    try {
+      const map = await slotService.getAvailabilityMap();
+      return {
+        success: true,
+        data: map
+      };
+    } catch (error) {
+      this.setStatus(500);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to retrieve availability map'
+      };
+    }
+  }
+
+  /**
    * Get slot by ID
    * @summary Get specific slot details
    */
@@ -226,28 +248,6 @@ export class SlotController extends Controller {
       return {
         success: false,
         message: error instanceof Error ? error.message : 'Failed to release maintenance status'
-      };
-    }
-  }
-
-  /**
-   * Get slot availability map
-   * @summary Get visual representation of slot availability
-   */
-  @Get('/availability-map')
-  @SuccessResponse(200, 'Availability map retrieved successfully')
-  public async getAvailabilityMap(): Promise<SlotResponse> {
-    try {
-      const map = await slotService.getAvailabilityMap();
-      return {
-        success: true,
-        data: map
-      };
-    } catch (error) {
-      this.setStatus(500);
-      return {
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to retrieve availability map'
       };
     }
   }

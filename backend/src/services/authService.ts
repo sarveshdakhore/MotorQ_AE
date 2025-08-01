@@ -15,8 +15,6 @@ export class AuthService {
   private readonly JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key';
   private readonly JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
   private readonly OTP_EXPIRY = 300; // 5 minutes
-  private readonly RATE_LIMIT_WINDOW = 300; // 5 minutes
-  private readonly MAX_OTP_REQUESTS = 3;
 
   async sendRegisterOTP(email: string): Promise<SendOTPResponse> {
     try {
@@ -33,31 +31,12 @@ export class AuthService {
         };
       }
 
-      // Check rate limiting
-      const rateLimitKey = `rate_limit:${email}`;
-      const requests = await redis.get(rateLimitKey) || '0';
-      
-      if (parseInt(requests) >= this.MAX_OTP_REQUESTS) {
-        return {
-          success: false,
-          message: 'Too many OTP requests. Please try again later',
-          otp: ''
-        };
-      }
-
       // Generate OTP
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
       
       // Store OTP in Redis
       const otpKey = `otp:register:${email}`;
       await redis.setEx(otpKey, this.OTP_EXPIRY, otp);
-
-      // Update rate limiting
-      if (parseInt(requests) === 0) {
-        await redis.setEx(rateLimitKey, this.RATE_LIMIT_WINDOW, '1');
-      } else {
-        await redis.incr(rateLimitKey);
-      }
 
       return {
         success: true,
@@ -146,31 +125,12 @@ export class AuthService {
         };
       }
 
-      // Check rate limiting
-      const rateLimitKey = `rate_limit:${email}`;
-      const requests = await redis.get(rateLimitKey) || '0';
-      
-      if (parseInt(requests) >= this.MAX_OTP_REQUESTS) {
-        return {
-          success: false,
-          message: 'Too many OTP requests. Please try again later',
-          otp: ''
-        };
-      }
-
       // Generate OTP
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
       
       // Store OTP in Redis
       const otpKey = `otp:login:${email}`;
       await redis.setEx(otpKey, this.OTP_EXPIRY, otp);
-
-      // Update rate limiting
-      if (parseInt(requests) === 0) {
-        await redis.setEx(rateLimitKey, this.RATE_LIMIT_WINDOW, '1');
-      } else {
-        await redis.incr(rateLimitKey);
-      }
 
       return {
         success: true,
