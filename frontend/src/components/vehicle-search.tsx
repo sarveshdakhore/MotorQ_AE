@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { parkingApi, VehicleSearchResponse, QuickSearchResult } from '@/lib/parking-api';
-import { Search, MapPin, Clock, DollarSign, Car, Bike, Zap, Accessibility } from 'lucide-react';
+import { Search, MapPin, Clock, IndianRupee, Car, Bike, Zap, Accessibility } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatToISTDateTime } from '@/lib/time-utils';
 
@@ -236,7 +236,7 @@ export function VehicleSearch({ onVehicleFound }: VehicleSearchProps) {
                       </div>
                     </div>
                     <div className="flex items-center p-3 bg-purple-50 rounded-lg">
-                      <DollarSign className="h-5 w-5 mr-2 text-purple-600" />
+                      <IndianRupee className="h-5 w-5 mr-2 text-purple-600" />
                       <div>
                         <div className="text-sm text-purple-900">Billing</div>
                         <div className="font-medium text-purple-800">{searchResult.currentSession.billingType}</div>

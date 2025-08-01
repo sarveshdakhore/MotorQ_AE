@@ -12,7 +12,7 @@ import {
   Bike, 
   Zap, 
   Accessibility, 
-  DollarSign,
+  IndianRupee,
   Plus,
   FileText,
   Printer
@@ -138,7 +138,7 @@ export function AssignmentResult({ result, onNewAssignment }: AssignmentResultPr
             </div>
 
             <div className="flex items-center">
-              <DollarSign className="h-5 w-5 text-green-600 mr-2" />
+              <IndianRupee className="h-5 w-5 text-green-600 mr-2" />
               <div>
                 <div className="text-sm text-gray-500">Billing Type</div>
                 <div>{getBillingTypeBadge(result.billingType)}</div>

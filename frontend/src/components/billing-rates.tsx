@@ -8,7 +8,7 @@ import { billingApi, BillingRates } from '@/lib/billing-api';
 import { 
   Clock, 
   Calendar, 
-  DollarSign,
+  IndianRupee,
   RefreshCw,
   Info,
   CheckCircle,
@@ -80,7 +80,7 @@ export function BillingRatesComponent() {
           <div className="flex justify-between items-center">
             <div>
               <CardTitle className="flex items-center">
-                <DollarSign className="h-5 w-5 mr-2 text-green-600" />
+                <IndianRupee className="h-5 w-5 mr-2 text-green-600" />
                 Billing & Pricing
               </CardTitle>
               <CardDescription>

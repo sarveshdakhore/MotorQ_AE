@@ -28,7 +28,7 @@ import {
   Loader2,
   Search,
   Clock,
-  DollarSign,
+  IndianRupee,
   MapPin,
   RefreshCw,
   Filter,
@@ -224,7 +224,7 @@ export function VehicleExitForm({ onSuccess, isLoading, setIsLoading, disabled =
     const hours = Math.ceil(durationMs / (1000 * 60 * 60)); // Round up to next hour
     
     if (session.billingType === 'HOURLY') {
-      return hours * 10; // $10 per hour
+      return hours * 10; // ₹10 per hour
     } else {
       return 50; // Day pass rate
     }
@@ -401,7 +401,7 @@ export function VehicleExitForm({ onSuccess, isLoading, setIsLoading, disabled =
                   </div>
 
                   <div className="flex items-center">
-                    <DollarSign className="h-5 w-5 text-purple-600 mr-2" />
+                    <IndianRupee className="h-5 w-5 text-purple-600 mr-2" />
                     <div>
                       <div className="text-sm text-gray-500">Billing Type</div>
                       <div className="font-semibold">
@@ -603,14 +603,14 @@ export function VehicleExitForm({ onSuccess, isLoading, setIsLoading, disabled =
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center">
-                            <DollarSign className="h-4 w-4 mr-1 text-gray-400" />
+                            <IndianRupee className="h-4 w-4 mr-1 text-gray-400" />
                             {getBillingTypeBadge(session.billingType)}
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center">
-                            <DollarSign className="h-4 w-4 mr-1 text-green-600" />
-                            <span className="font-semibold text-green-600">${estimatedAmount}</span>
+                            <IndianRupee className="h-4 w-4 mr-1 text-green-600" />
+                            <span className="font-semibold text-green-600">₹{estimatedAmount}</span>
                           </div>
                         </TableCell>
                         <TableCell>

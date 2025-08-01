@@ -47,8 +47,8 @@ export function Navigation() {
   // Fetch real notification count
   useEffect(() => {
     fetchNotificationCount();
-    // Set up interval to refresh notification count every 30 seconds
-    const interval = setInterval(fetchNotificationCount, 30000);
+    // Set up interval to refresh notification count every 5 minutes
+    const interval = setInterval(fetchNotificationCount, 300000);
     return () => clearInterval(interval);
   }, []);
 

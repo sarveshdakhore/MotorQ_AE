@@ -23,7 +23,7 @@ import {
   Accessibility, 
   Clock, 
   MapPin, 
-  DollarSign,
+  IndianRupee,
   RefreshCw,
   ChevronLeft,
   ChevronRight,
@@ -204,7 +204,7 @@ export function PastSessions({ refreshTrigger }: PastSessionsProps) {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center">
-              <DollarSign className="h-8 w-8 text-green-600 mr-3" />
+              <IndianRupee className="h-8 w-8 text-green-600 mr-3" />
               <div>
                 <div className="text-2xl font-bold">₹{totalRevenue}</div>
                 <div className="text-sm text-gray-600">Total Revenue</div>

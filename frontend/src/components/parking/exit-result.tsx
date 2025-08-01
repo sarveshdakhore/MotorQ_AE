@@ -9,7 +9,7 @@ import {
   LogOut, 
   Clock, 
   Car, 
-  DollarSign,
+  IndianRupee,
   Plus,
   FileText,
   Printer,
@@ -64,8 +64,8 @@ export function ExitResult({ result, onNewExit }: ExitResultProps) {
     if (!result) return null;
     
     // Simple savings calculation (this could be enhanced)
-    const hourlyRate = 10; // Assuming $10/hour
-    const dayPassRate = 50; // Assuming $50/day
+    const hourlyRate = 10; // Assuming ₹10/hour
+    const dayPassRate = 50; // Assuming ₹50/day
     
     if (result.billingType === 'HOURLY') {
       const dayPassCost = dayPassRate;
@@ -245,7 +245,7 @@ export function ExitResult({ result, onNewExit }: ExitResultProps) {
               <div className="flex justify-between items-center text-lg">
                 <span className="font-semibold">Total Amount:</span>
                 <div className="flex items-center">
-                  <DollarSign className="h-5 w-5 text-green-600 mr-1" />
+                  <IndianRupee className="h-5 w-5 text-green-600 mr-1" />
                   <span className="font-bold text-green-600">₹{result.billingAmount}</span>
                 </div>
               </div>

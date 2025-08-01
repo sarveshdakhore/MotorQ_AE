@@ -32,7 +32,7 @@ import {
   Accessibility, 
   Clock, 
   MapPin, 
-  DollarSign,
+  IndianRupee,
   Filter,
   RefreshCw,
   ArrowRightLeft
@@ -334,7 +334,7 @@ export function CurrentSessions({ refreshTrigger }: CurrentSessionsProps) {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center">
-                          <DollarSign className="h-4 w-4 mr-1 text-gray-400" />
+                          <IndianRupee className="h-4 w-4 mr-1 text-gray-400" />
                           {getBillingTypeBadge(session.billingType)}
                         </div>
                       </TableCell>

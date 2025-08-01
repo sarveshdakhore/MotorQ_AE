@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { 
   AlertTriangle, 
   Clock, 
-  DollarSign, 
+  IndianRupee, 
   Settings,
   CheckCircle,
   X,
@@ -69,7 +69,7 @@ export function NotificationDropdown({ onClose, onNotificationCountChange }: Not
       case 'overstay':
         return <AlertTriangle className={`h-4 w-4 ${iconClass}`} />;
       case 'revenue':
-        return <DollarSign className={`h-4 w-4 ${iconClass}`} />;
+        return <IndianRupee className={`h-4 w-4 ${iconClass}`} />;
       case 'system':
         return <Settings className={`h-4 w-4 ${iconClass}`} />;
       case 'maintenance':
@@ -230,7 +230,7 @@ export function NotificationDropdown({ onClose, onNotificationCountChange }: Not
                       )}
                       {notification.metadata.amount && (
                         <Badge variant="outline" className="text-xs flex items-center">
-                          <DollarSign className="h-3 w-3 mr-1" />
+                          <IndianRupee className="h-3 w-3 mr-1" />
                           ₹{notification.metadata.amount.toLocaleString()}
                         </Badge>
                       )}
