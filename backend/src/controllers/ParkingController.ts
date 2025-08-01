@@ -76,6 +76,31 @@ interface VehicleExitResponse {
   };
 }
 
+interface SlotOverrideRequest {
+  newSlotId: string;
+}
+
+interface SlotOverrideResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    sessionId: string;
+    vehicleNumberPlate: string;
+    oldSlot: {
+      id: string;
+      slotNumber: string;
+      slotType: string;
+    };
+    newSlot: {
+      id: string;
+      slotNumber: string;
+      slotType: string;
+    };
+    entryTime: Date;
+    billingType: 'HOURLY' | 'DAY_PASS';
+  };
+}
+
 @Route('api/parking')
 @Tags('Parking')
 export class ParkingController extends Controller {
@@ -244,6 +269,35 @@ export class ParkingController extends Controller {
           total: 0,
           totalPages: 0
         }
+      };
+    }
+  }
+
+  /**
+   * Override parking slot for active session
+   * @summary Change parking slot for an active session without resetting entry time
+   */
+  @Post('/{sessionId}/override-slot')
+  @SuccessResponse(200, 'Slot override successful')
+  @Response(400, 'Invalid request or slot not available')
+  @Response(404, 'Session not found')
+  public async overrideSlot(
+    @Path() sessionId: string,
+    @Body() requestBody: SlotOverrideRequest
+  ): Promise<SlotOverrideResponse> {
+    try {
+      const result = await parkingService.overrideSlot(sessionId, requestBody.newSlotId);
+      
+      if (!result.success) {
+        this.setStatus(400);
+      }
+      
+      return result;
+    } catch (error) {
+      this.setStatus(500);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to override slot'
       };
     }
   }

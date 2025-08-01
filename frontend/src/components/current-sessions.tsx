@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Select } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Table, 
   TableBody, 
@@ -13,8 +13,18 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose
+} from '@/components/ui/dialog';
 import { parkingApi, CurrentlyParkedVehicle } from '@/lib/parking-api';
-import { formatToISTDateTime, formatToISTTimeOnly } from '@/lib/time-utils';
+import { SlotSelector } from '@/components/parking/slot-selector';
+import { formatToISTDateTime } from '@/lib/time-utils';
 import { 
   Car, 
   Bike, 
@@ -24,7 +34,8 @@ import {
   MapPin, 
   DollarSign,
   Filter,
-  RefreshCw
+  RefreshCw,
+  ArrowRightLeft
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -44,9 +55,15 @@ export function CurrentSessions({ refreshTrigger }: CurrentSessionsProps) {
     totalPages: 0
   });
 
+  // Override slot state
+  const [overrideDialogOpen, setOverrideDialogOpen] = useState(false);
+  const [selectedSession, setSelectedSession] = useState<CurrentlyParkedVehicle | null>(null);
+  const [selectedNewSlotId, setSelectedNewSlotId] = useState<string>('');
+  const [isOverriding, setIsOverriding] = useState(false);
+
   useEffect(() => {
     fetchCurrentSessions();
-  }, [refreshTrigger]);
+  }, [refreshTrigger]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     // Filter sessions based on selected vehicle type
@@ -119,29 +136,53 @@ export function CurrentSessions({ refreshTrigger }: CurrentSessionsProps) {
     );
   };
 
-  const getStatusBadge = (status: string) => {
-    const isActive = status.toLowerCase() === 'active';
-    return (
-      <Badge variant={isActive ? 'success' : 'secondary'}>
-        {status}
-      </Badge>
-    );
-  };
-
-  const formatDuration = (entryTime: string) => {
-    const entry = new Date(entryTime);
-    const now = new Date();
-    const diffMs = now.getTime() - entry.getTime();
-    const hours = Math.floor(diffMs / (1000 * 60 * 60));
-    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    return `${hours}h ${minutes}m`;
-  };
 
   const vehicleTypeCounts = (sessions || []).reduce((acc, session) => {
     const type = session.vehicle.vehicleType;
     acc[type] = (acc[type] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
+
+  // Override slot functions
+  const handleOverrideSlot = (session: CurrentlyParkedVehicle) => {
+    setSelectedSession(session);
+    setSelectedNewSlotId('');
+    setOverrideDialogOpen(true);
+  };
+
+  const handleOverrideConfirm = async () => {
+    if (!selectedSession || !selectedNewSlotId) {
+      toast.error('Please select a new slot');
+      return;
+    }
+
+    setIsOverriding(true);
+    try {
+      const result = await parkingApi.overrideSlot(selectedSession.sessionId, selectedNewSlotId);
+      
+      if (result.success) {
+        toast.success(result.message);
+        setOverrideDialogOpen(false);
+        setSelectedSession(null);
+        setSelectedNewSlotId('');
+        // Refresh the sessions list
+        fetchCurrentSessions();
+      } else {
+        toast.error(result.message || 'Failed to override slot');
+      }
+    } catch (error) {
+      console.error('Override slot error:', error);
+      toast.error('Failed to override slot. Please try again.');
+    } finally {
+      setIsOverriding(false);
+    }
+  };
+
+  const handleOverrideCancel = () => {
+    setOverrideDialogOpen(false);
+    setSelectedSession(null);
+    setSelectedNewSlotId('');
+  };
 
   if (isLoading) {
     return (
@@ -223,14 +264,18 @@ export function CurrentSessions({ refreshTrigger }: CurrentSessionsProps) {
                 <Filter className="h-4 w-4 text-gray-500" />
                 <Select
                   value={selectedVehicleType}
-                  onChange={(e) => setSelectedVehicleType(e.target.value)}
-                  className="w-40"
+                  onValueChange={setSelectedVehicleType}
                 >
-                  <option value="all">All Types</option>
-                  <option value="CAR">Cars</option>
-                  <option value="BIKE">Bikes</option>
-                  <option value="EV">EVs</option>
-                  <option value="HANDICAP_ACCESSIBLE">Accessible</option>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="All Types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="CAR">Cars</SelectItem>
+                    <SelectItem value="BIKE">Bikes</SelectItem>
+                    <SelectItem value="EV">EVs</SelectItem>
+                    <SelectItem value="HANDICAP_ACCESSIBLE">Accessible</SelectItem>
+                  </SelectContent>
                 </Select>
               </div>
               <Button variant="outline" size="sm" onClick={fetchCurrentSessions}>
@@ -256,6 +301,7 @@ export function CurrentSessions({ refreshTrigger }: CurrentSessionsProps) {
                   <TableHead>Duration</TableHead>
                   <TableHead>Billing</TableHead>
                   <TableHead>Entry Time</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -298,6 +344,17 @@ export function CurrentSessions({ refreshTrigger }: CurrentSessionsProps) {
                           <div className="text-xs text-gray-400">IST</div>
                         </div>
                       </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleOverrideSlot(session)}
+                          className="flex items-center"
+                        >
+                          <ArrowRightLeft className="h-4 w-4 mr-1" />
+                          Change Slot
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -306,6 +363,87 @@ export function CurrentSessions({ refreshTrigger }: CurrentSessionsProps) {
           )}
         </CardContent>
       </Card>
+
+      {/* Override Slot Dialog */}
+      <Dialog open={overrideDialogOpen} onOpenChange={setOverrideDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <ArrowRightLeft className="h-5 w-5 mr-2" />
+              Change Parking Slot
+            </DialogTitle>
+            <DialogDescription>
+              {selectedSession && (
+                <>
+                  Change slot for vehicle <strong>{selectedSession.vehicle.numberPlate}</strong> 
+                  {' '}currently in slot <strong>{selectedSession.slot.number}</strong>. 
+                  The entry time will be preserved.
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedSession && (
+            <div className="space-y-4">
+              {/* Current Session Info */}
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    {(() => {
+                      const Icon = getVehicleIcon(selectedSession.vehicle.vehicleType);
+                      return <Icon className="h-5 w-5 mr-2 text-gray-600" />;
+                    })()}
+                    <div>
+                      <div className="font-medium">{selectedSession.vehicle.numberPlate}</div>
+                      <div className="text-sm text-gray-500">
+                        {getVehicleTypeBadge(selectedSession.vehicle.vehicleType)}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="flex items-center text-sm text-gray-600">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      Current: <strong className="ml-1">{selectedSession.slot.number}</strong>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-500">
+                      <Clock className="h-4 w-4 mr-1" />
+                      {selectedSession.duration}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Slot Selector */}
+              <SlotSelector
+                vehicleType={selectedSession.vehicle.vehicleType}
+                selectedSlotId={selectedNewSlotId}
+                onSlotSelect={setSelectedNewSlotId}
+                disabled={isOverriding}
+              />
+            </div>
+          )}
+
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button 
+                variant="outline" 
+                onClick={handleOverrideCancel}
+                disabled={isOverriding}
+              >
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button 
+              onClick={handleOverrideConfirm}
+              disabled={!selectedNewSlotId || isOverriding}
+              className="flex items-center"
+            >
+              {isOverriding && <RefreshCw className="h-4 w-4 mr-2 animate-spin" />}
+              {isOverriding ? 'Changing...' : 'Confirm Change'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

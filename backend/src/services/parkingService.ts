@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { VehicleType, BillingType, SlotStatus, SessionStatus, SlotType } from '@prisma/client';
 import { slotService } from './slotService';
+import { billingService } from './billingService';
 
 const prisma = new PrismaClient();
 
@@ -127,7 +128,7 @@ class ParkingService {
           }
         });
       }, {
-        timeout: 10000,  // 10 second timeout for the entire transaction
+        timeout: 10000,
         isolationLevel: 'ReadCommitted'
       });
 
@@ -170,31 +171,15 @@ class ParkingService {
       }
 
       const exitTime = new Date();
-      const durationMs = exitTime.getTime() - activeSession.entryTime.getTime();
-      const durationHours = Math.ceil(durationMs / (1000 * 60 * 60));
-      const durationString = this.formatDuration(durationMs);
+      
+      // Calculate billing amount using the new billing service
+      const billingResult = billingService.calculateBillingAmount(
+        activeSession.entryTime,
+        exitTime,
+        activeSession.billingType
+      );
 
-      // Calculate billing amount
-      let billingAmount = 0;
-      if (activeSession.billingType === BillingType.HOURLY) {
-        const pricing = await prisma.pricingConfig.findFirst({
-          where: {
-            vehicleType: activeSession.vehicle.vehicleType,
-            billingType: BillingType.HOURLY,
-            isActive: true
-          }
-        });
-        billingAmount = pricing ? Number(pricing.hourlyRate) * durationHours : durationHours * 10; // Default rate
-      } else {
-        const pricing = await prisma.pricingConfig.findFirst({
-          where: {
-            vehicleType: activeSession.vehicle.vehicleType,
-            billingType: BillingType.DAY_PASS,
-            isActive: true
-          }
-        });
-        billingAmount = pricing ? Number(pricing.dayPassRate) : 100; // Default day pass rate
-      }
+      const { amount: billingAmount, duration: durationString } = billingResult;
 
       // Complete session and free slot
       await prisma.$transaction(async (tx) => {
@@ -220,11 +205,17 @@ class ParkingService {
         message: 'Vehicle exit registered successfully',
         data: {
           sessionId: activeSession.id,
+          numberPlate: activeSession.vehicle.numberPlate,
+          vehicleType: activeSession.vehicle.vehicleType,
+          slotNumber: activeSession.slot.slotNumber,
           entryTime: activeSession.entryTime,
           exitTime,
           duration: durationString,
           billingAmount,
-          billingType: activeSession.billingType
+          billingType: activeSession.billingType,
+          durationHours: billingResult.durationHours,
+          appliedRate: billingResult.appliedRate,
+          currency: billingService.getCurrency()
         }
       };
     } catch (error) {
@@ -445,6 +436,155 @@ class ParkingService {
     }
   }
 
+
+  async overrideSlot(sessionId: string, newSlotId: string) {
+    try {
+      const result = await prisma.$transaction(async (tx) => {
+        // 1. Lock and validate the current session
+        const currentSession = await tx.parkingSession.findFirst({
+          where: {
+            id: sessionId,
+            status: SessionStatus.ACTIVE
+          },
+          include: {
+            vehicle: true,
+            slot: true
+          }
+        });
+
+        if (!currentSession) {
+          throw new Error('Active parking session not found');
+        }
+
+        // 2. Prevent override to the same slot
+        if (currentSession.slotId === newSlotId) {
+          throw new Error('Cannot override to the current slot');
+        }
+
+        // 3. Lock and validate the current slot
+        const currentSlot = await tx.parkingSlot.findFirst({
+          where: {
+            id: currentSession.slotId,
+            status: SlotStatus.OCCUPIED
+          }
+        });
+
+        if (!currentSlot) {
+          throw new Error('Current slot is in invalid state');
+        }
+
+        // 4. Lock and validate the new slot
+        const newSlot = await tx.parkingSlot.findFirst({
+          where: {
+            id: newSlotId,
+            status: SlotStatus.AVAILABLE
+          }
+        });
+
+        if (!newSlot) {
+          throw new Error('Target slot is not available or does not exist');
+        }
+
+        // 5. Validate vehicle-slot compatibility
+        const vehicleType = currentSession.vehicle.vehicleType;
+        const isCompatible = this.isSlotCompatibleWithVehicle(vehicleType, newSlot.slotType);
+        
+        if (!isCompatible) {
+          throw new Error(`${vehicleType} vehicles are not compatible with ${newSlot.slotType} slots`);
+        }
+
+        // 6. Perform atomic slot override operations
+        // Update session to point to new slot (preserve entryTime and all other data)
+        const updatedSession = await tx.parkingSession.update({
+          where: { id: sessionId },
+          data: { slotId: newSlotId },
+          include: {
+            vehicle: true,
+            slot: true
+          }
+        });
+
+        // 7. Release old slot
+        await tx.parkingSlot.update({
+          where: { id: currentSession.slotId },
+          data: { status: SlotStatus.AVAILABLE }
+        });
+
+        // 8. Occupy new slot
+        await tx.parkingSlot.update({
+          where: { id: newSlotId },
+          data: { status: SlotStatus.OCCUPIED }
+        });
+
+        return {
+          success: true,
+          session: updatedSession,
+          oldSlot: currentSlot,
+          newSlot: newSlot
+        };
+      }, {
+        timeout: 10000,
+        isolationLevel: 'ReadCommitted'
+      });
+
+      return {
+        success: true,
+        message: `Slot override successful: ${result.oldSlot.slotNumber} → ${result.newSlot.slotNumber}`,
+        data: {
+          sessionId: result.session.id,
+          vehicleNumberPlate: result.session.vehicle.numberPlate,
+          oldSlot: {
+            id: result.oldSlot.id,
+            slotNumber: result.oldSlot.slotNumber,
+            slotType: result.oldSlot.slotType
+          },
+          newSlot: {
+            id: result.newSlot.id,
+            slotNumber: result.newSlot.slotNumber,
+            slotType: result.newSlot.slotType
+          },
+          entryTime: result.session.entryTime, // Preserved original entry time
+          billingType: result.session.billingType
+        }
+      };
+    } catch (error) {
+      console.error('Error overriding slot:', error);
+      
+      // Handle specific transaction errors
+      if (error instanceof Error) {
+        if (error.message?.includes('timeout')) {
+          return {
+            success: false,
+            message: 'Slot override timeout - please try again'
+          };
+        }
+        
+        // Return the specific error message for business logic errors
+        return {
+          success: false,
+          message: error.message
+        };
+      }
+      
+      return {
+        success: false,
+        message: 'Failed to override slot - please try again'
+      };
+    }
+  }
+
+  private isSlotCompatibleWithVehicle(vehicleType: VehicleType, slotType: SlotType): boolean {
+    // Define compatibility matrix based on business rules
+    const compatibility: Record<VehicleType, SlotType[]> = {
+      [VehicleType.CAR]: [SlotType.REGULAR, SlotType.COMPACT],
+      [VehicleType.BIKE]: [SlotType.REGULAR], // Assuming regular slots accommodate bikes
+      [VehicleType.EV]: [SlotType.EV, SlotType.REGULAR, SlotType.COMPACT], // EV can use any slot
+      [VehicleType.HANDICAP_ACCESSIBLE]: [SlotType.HANDICAP_ACCESSIBLE, SlotType.REGULAR, SlotType.COMPACT]
+    };
+
+    const compatibleSlotTypes = compatibility[vehicleType] || [];
+    return compatibleSlotTypes.includes(slotType);
+  }
 
   private formatDuration(milliseconds: number): string {
     const hours = Math.floor(milliseconds / (1000 * 60 * 60));

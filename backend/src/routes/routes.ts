@@ -16,6 +16,8 @@ import { ParkingController } from './../controllers/ParkingController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { DashboardController } from './../controllers/DashboardController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { BillingController } from './../controllers/BillingController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { AuthController } from './../controllers/AuthController';
 import type { Request as ExRequest, Response as ExResponse, RequestHandler, Router } from 'express';
 
@@ -187,6 +189,24 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "SlotOverrideResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "message": {"dataType":"string","required":true},
+            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"billingType":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["HOURLY"]},{"dataType":"enum","enums":["DAY_PASS"]}],"required":true},"entryTime":{"dataType":"datetime","required":true},"newSlot":{"dataType":"nestedObjectLiteral","nestedProperties":{"slotType":{"dataType":"string","required":true},"slotNumber":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}},"required":true},"oldSlot":{"dataType":"nestedObjectLiteral","nestedProperties":{"slotType":{"dataType":"string","required":true},"slotNumber":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}},"required":true},"vehicleNumberPlate":{"dataType":"string","required":true},"sessionId":{"dataType":"string","required":true}}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "SlotOverrideRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "newSlotId": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "DashboardStats": {
         "dataType": "refObject",
         "properties": {
@@ -219,6 +239,42 @@ const models: TsoaRoute.Models = {
             "exitsLastHour": {"dataType":"double","required":true},
             "averageParkingDuration": {"dataType":"string","required":true},
             "peakHours": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"entries":{"dataType":"double","required":true},"hour":{"dataType":"double","required":true}}},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "BillingConfigResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"currency":{"dataType":"string","required":true},"dayPassRate":{"dataType":"double","required":true},"hourlyRates":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"rate":{"dataType":"double","required":true},"maxHours":{"dataType":"double","required":true},"minHours":{"dataType":"double","required":true}}},"required":true}},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "BillingPreviewResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"dayPass":{"dataType":"nestedObjectLiteral","nestedProperties":{"description":{"dataType":"string","required":true},"rate":{"dataType":"double","required":true}},"required":true},"hourlyRates":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"description":{"dataType":"string","required":true},"rate":{"dataType":"double","required":true},"duration":{"dataType":"string","required":true}}},"required":true}},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CostEstimateResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"currency":{"dataType":"string","required":true},"durationHours":{"dataType":"double","required":true},"estimatedAmount":{"dataType":"double","required":true},"currentDuration":{"dataType":"string","required":true}},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CostEstimateRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "entryTime": {"dataType":"string","required":true},
+            "billingType": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["HOURLY"]},{"dataType":"enum","enums":["DAY_PASS"]}],"required":true},
         },
         "additionalProperties": false,
     },
@@ -1389,6 +1445,37 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsParkingController_overrideSlot: Record<string, TsoaRoute.ParameterSchema> = {
+                sessionId: {"in":"path","name":"sessionId","required":true,"dataType":"string"},
+                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"SlotOverrideRequest"},
+        };
+        app.post('/api/parking/:sessionId/override-slot',
+            ...(fetchMiddlewares<RequestHandler>(ParkingController)),
+            ...(fetchMiddlewares<RequestHandler>(ParkingController.prototype.overrideSlot)),
+
+            async function ParkingController_overrideSlot(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsParkingController_overrideSlot, request, response });
+
+                const controller = new ParkingController();
+
+              await templateService.apiHandler({
+                methodName: 'overrideSlot',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsDashboardController_getDashboardStats: Record<string, TsoaRoute.ParameterSchema> = {
         };
         app.get('/api/dashboard/stats',
@@ -1556,6 +1643,126 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getSlotAvailability',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsBillingController_getBillingConfig: Record<string, TsoaRoute.ParameterSchema> = {
+        };
+        app.get('/api/billing/config',
+            ...(fetchMiddlewares<RequestHandler>(BillingController)),
+            ...(fetchMiddlewares<RequestHandler>(BillingController.prototype.getBillingConfig)),
+
+            async function BillingController_getBillingConfig(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsBillingController_getBillingConfig, request, response });
+
+                const controller = new BillingController();
+
+              await templateService.apiHandler({
+                methodName: 'getBillingConfig',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsBillingController_getBillingRates: Record<string, TsoaRoute.ParameterSchema> = {
+        };
+        app.get('/api/billing/rates',
+            ...(fetchMiddlewares<RequestHandler>(BillingController)),
+            ...(fetchMiddlewares<RequestHandler>(BillingController.prototype.getBillingRates)),
+
+            async function BillingController_getBillingRates(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsBillingController_getBillingRates, request, response });
+
+                const controller = new BillingController();
+
+              await templateService.apiHandler({
+                methodName: 'getBillingRates',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsBillingController_calculateCostEstimate: Record<string, TsoaRoute.ParameterSchema> = {
+                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"CostEstimateRequest"},
+        };
+        app.post('/api/billing/estimate',
+            ...(fetchMiddlewares<RequestHandler>(BillingController)),
+            ...(fetchMiddlewares<RequestHandler>(BillingController.prototype.calculateCostEstimate)),
+
+            async function BillingController_calculateCostEstimate(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsBillingController_calculateCostEstimate, request, response });
+
+                const controller = new BillingController();
+
+              await templateService.apiHandler({
+                methodName: 'calculateCostEstimate',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsBillingController_calculateBilling: Record<string, TsoaRoute.ParameterSchema> = {
+                entryTime: {"in":"query","name":"entryTime","required":true,"dataType":"string"},
+                exitTime: {"in":"query","name":"exitTime","required":true,"dataType":"string"},
+                billingType: {"in":"query","name":"billingType","required":true,"dataType":"union","subSchemas":[{"dataType":"enum","enums":["HOURLY"]},{"dataType":"enum","enums":["DAY_PASS"]}]},
+        };
+        app.get('/api/billing/calculate',
+            ...(fetchMiddlewares<RequestHandler>(BillingController)),
+            ...(fetchMiddlewares<RequestHandler>(BillingController.prototype.calculateBilling)),
+
+            async function BillingController_calculateBilling(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsBillingController_calculateBilling, request, response });
+
+                const controller = new BillingController();
+
+              await templateService.apiHandler({
+                methodName: 'calculateBilling',
                 controller,
                 response,
                 next,

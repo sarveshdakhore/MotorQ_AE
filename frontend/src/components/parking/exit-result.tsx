@@ -99,8 +99,8 @@ export function ExitResult({ result, onNewExit }: ExitResultProps) {
       
       BILLING:
       Type: ${result.billingType}
-      Amount: $${result.billingAmount}
-      ${savings > 0 ? `Savings vs Day Pass: $${savings}` : ''}
+      Amount: ₹${result.billingAmount}
+      ${savings > 0 ? `Savings vs Day Pass: ₹${savings}` : ''}
       
       STATUS: PAYMENT COMPLETED
       
@@ -237,7 +237,7 @@ export function ExitResult({ result, onNewExit }: ExitResultProps) {
             {savings > 0 && (
               <div className="flex justify-between items-center text-green-600">
                 <span>Savings vs Day Pass:</span>
-                <span className="font-medium">${savings}</span>
+                <span className="font-medium">₹{savings}</span>
               </div>
             )}
             
@@ -246,7 +246,7 @@ export function ExitResult({ result, onNewExit }: ExitResultProps) {
                 <span className="font-semibold">Total Amount:</span>
                 <div className="flex items-center">
                   <DollarSign className="h-5 w-5 text-green-600 mr-1" />
-                  <span className="font-bold text-green-600">${result.billingAmount}</span>
+                  <span className="font-bold text-green-600">₹{result.billingAmount}</span>
                 </div>
               </div>
             </div>
@@ -306,7 +306,7 @@ export function ExitResult({ result, onNewExit }: ExitResultProps) {
           <div className="text-sm text-blue-700 space-y-1">
             <div>• Vehicle {result.numberPlate} exited successfully</div>
             <div>• Slot #{result.slotNumber} is now available</div>
-            <div>• Payment of ${result.billingAmount} processed</div>
+            <div>• Payment of ₹{result.billingAmount} processed</div>
             <div>• Receipt available for printing</div>
           </div>
         </div>

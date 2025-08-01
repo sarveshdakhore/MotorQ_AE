@@ -31,6 +31,7 @@ export interface RevenueStats {
     hourly: number;
     dayPass: number;
   };
+  currency: string;
 }
 
 export interface ActivityStats {

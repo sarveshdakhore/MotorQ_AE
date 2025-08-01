@@ -144,7 +144,8 @@ class DashboardService {
         byBillingType: {
           hourly: Number(billingStats.hourly) || 0,
           dayPass: Number(billingStats.dayPass) || 0
-        }
+        },
+        currency: '₹'
       };
     } catch (error) {
       console.error('Error getting revenue stats:', error);

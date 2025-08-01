@@ -66,6 +66,31 @@ export interface QuickSearchResult {
   status: string;
 }
 
+export interface SlotOverrideRequest {
+  newSlotId: string;
+}
+
+export interface SlotOverrideResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    sessionId: string;
+    vehicleNumberPlate: string;
+    oldSlot: {
+      id: string;
+      slotNumber: string;
+      slotType: string;
+    };
+    newSlot: {
+      id: string;
+      slotNumber: string;
+      slotType: string;
+    };
+    entryTime: string;
+    billingType: 'HOURLY' | 'DAY_PASS';
+  };
+}
+
 // API functions
 export const parkingApi = {
   // Search for a specific vehicle by number plate
@@ -102,9 +127,20 @@ export const parkingApi = {
     vehicleType?: string;
     page?: number;
     limit?: number;
-  }): Promise<any> {
+  }): Promise<{
+    data: any[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+  }> {
     const response = await axios.get(`${API_BASE_URL}/parking/history`, { params });
-    return response.data.data;
+    return {
+      data: response.data.data || [],
+      pagination: response.data.pagination || { page: 1, limit: 20, total: 0, totalPages: 0 }
+    };
   },
 
   // Register vehicle entry
@@ -122,5 +158,13 @@ export const parkingApi = {
   async registerVehicleExit(numberPlate: string): Promise<any> {
     const response = await axios.post(`${API_BASE_URL}/parking/exit`, { numberPlate });
     return response.data; // Return the full response including success field
+  },
+
+  // Override parking slot for active session
+  async overrideSlot(sessionId: string, newSlotId: string): Promise<SlotOverrideResponse> {
+    const response = await axios.post(`${API_BASE_URL}/parking/${sessionId}/override-slot`, {
+      newSlotId
+    });
+    return response.data;
   },
 };

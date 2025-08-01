@@ -10,6 +10,8 @@ import { useAuth } from '@/contexts/auth-context';
 import { Navigation } from '@/components/navigation';
 import { VehicleSearch } from '@/components/vehicle-search';
 import { CurrentSessions } from '@/components/current-sessions';
+import { PastSessions } from '@/components/past-sessions';
+import { BillingRatesComponent } from '@/components/billing-rates';
 import { dashboardApi, DashboardStats, RevenueStats, ActivityStats } from '@/lib/dashboard-api';
 import { formatToISTTimeOnly } from '@/lib/time-utils';
 import { 
@@ -38,7 +40,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [selectedView, setSelectedView] = useState<'overview' | 'search' | 'sessions' | 'history'>('overview');
+  const [selectedView, setSelectedView] = useState<'overview' | 'search' | 'sessions' | 'past' | 'billing'>('overview');
 
   // Auth check removed - open access mode
   // useEffect(() => {
@@ -89,7 +91,8 @@ export default function DashboardPage() {
         today: 0,
         thisWeek: 0,
         thisMonth: 0,
-        byBillingType: { hourly: 0, dayPass: 0 }
+        byBillingType: { hourly: 0, dayPass: 0 },
+        currency: '₹'
       });
       setActivityStats({
         entriesLastHour: 0,
@@ -201,15 +204,26 @@ export default function DashboardPage() {
               Current Sessions
             </button>
             <button
-              onClick={() => setSelectedView('history')}
+              onClick={() => setSelectedView('past')}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                selectedView === 'history'
+                selectedView === 'past'
                   ? 'bg-white text-blue-600 shadow'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               <Clock className="h-4 w-4 mr-2 inline" />
               Past Sessions
+            </button>
+            <button
+              onClick={() => setSelectedView('billing')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                selectedView === 'billing'
+                  ? 'bg-white text-blue-600 shadow'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <DollarSign className="h-4 w-4 mr-2 inline" />
+              Billing & Rates
             </button>
           </div>
 
@@ -256,13 +270,13 @@ export default function DashboardPage() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Today's Revenue</CardTitle>
+                <CardTitle className="text-sm font-medium">Today&apos;s Revenue</CardTitle>
                 <DollarSign className="h-4 w-4 text-green-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">${revenueStats?.today || 0}</div>
+                <div className="text-2xl font-bold text-green-600">{revenueStats?.currency || '₹'}{revenueStats?.today || 0}</div>
                 <p className="text-xs text-muted-foreground">
-                  This week: ${revenueStats?.thisWeek || 0}
+                  This week: {revenueStats?.currency || '₹'}{revenueStats?.thisWeek || 0}
                 </p>
               </CardContent>
             </Card>
@@ -349,24 +363,24 @@ export default function DashboardPage() {
                       <div className="p-3 bg-blue-50 rounded-lg">
                         <div className="text-sm text-blue-900">Hourly</div>
                         <div className="text-lg font-bold text-blue-800">
-                          ${revenueStats?.byBillingType.hourly || 0}
+                          {revenueStats?.currency || '₹'}{revenueStats?.byBillingType.hourly || 0}
                         </div>
                       </div>
                       <div className="p-3 bg-green-50 rounded-lg">
                         <div className="text-sm text-green-900">Day Pass</div>
                         <div className="text-lg font-bold text-green-800">
-                          ${revenueStats?.byBillingType.dayPass || 0}
+                          {revenueStats?.currency || '₹'}{revenueStats?.byBillingType.dayPass || 0}
                         </div>
                       </div>
                     </div>
                     <div className="border-t pt-4 space-y-2">
                       <div className="flex justify-between">
                         <span className="text-sm">This Week</span>
-                        <span className="font-medium">${revenueStats?.thisWeek || 0}</span>
+                        <span className="font-medium">{revenueStats?.currency || '₹'}{revenueStats?.thisWeek || 0}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm">This Month</span>
-                        <span className="font-medium">${revenueStats?.thisMonth || 0}</span>
+                        <span className="font-medium">{revenueStats?.currency || '₹'}{revenueStats?.thisMonth || 0}</span>
                       </div>
                     </div>
                   </div>
@@ -435,6 +449,14 @@ export default function DashboardPage() {
 
           {selectedView === 'sessions' && (
             <CurrentSessions refreshTrigger={refreshTrigger} />
+          )}
+
+          {selectedView === 'past' && (
+            <PastSessions refreshTrigger={refreshTrigger} />
+          )}
+
+          {selectedView === 'billing' && (
+            <BillingRatesComponent />
           )}
         </div>
       </main>
