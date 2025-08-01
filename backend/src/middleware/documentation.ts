@@ -20,7 +20,7 @@ export function getDocumentationConfig(): DocumentationConfig {
 
   return {
     enableDocs,
-    basePath: "/api",
+    basePath: process.env.API_BASE_PATH || "",
     port: parseInt(process.env.PORT || "8000", 10),
   };
 }

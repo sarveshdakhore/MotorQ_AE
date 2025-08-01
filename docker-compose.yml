@@ -60,7 +60,7 @@ services:
       REDIS_URL: "redis://redis:6379"
       PORT: 8001
       NODE_ENV: development
-      API_BASE_PATH: "/api"
+      API_BASE_PATH: ""
       ENABLE_DOCS: "true"
     depends_on:
       postgres:

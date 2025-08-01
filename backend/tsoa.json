@@ -1,7 +1,7 @@
 {
   "entryFile": "src/app.ts",
-  "noImplicitAdditionalProperties": "silently-remove-extras",
-  "controllerPathGlobs": ["src/controllers/*.ts"],
+  "noImplicitAdditionalProperties": "throw-on-extras",
+  "controllerPathGlobs": ["src/controllers/*Controller.ts"],
   "compilerOptions": {
     "skipLibCheck": true,
     "noImplicitAny": false
@@ -18,6 +18,6 @@
     }
   },
   "routes": {
-    "routesDir": "build"
+    "routesDir": "src/routes"
   }
 }

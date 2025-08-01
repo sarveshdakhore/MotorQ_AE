@@ -47,11 +47,22 @@ export class AuthController extends Controller {
   @Post('/verify-register-otp')
   @SuccessResponse(200, 'Registration successful')
   @Response(400, 'Invalid OTP or registration failed')
-  public async verifyRegisterOTP(@Body() requestBody: VerifyOTPRequest): Promise<VerifyOTPResponse> {
+  public async verifyRegisterOTP(
+    @Body() requestBody: VerifyOTPRequest,
+    @Request() request: any
+  ): Promise<VerifyOTPResponse> {
     const result = await authService.verifyRegisterOTP(requestBody.email, requestBody.otp);
     
     if (!result.success) {
       this.setStatus(400);
+    } else if (result.token && request.res) {
+      // Set cookie if token is present
+      request.res.cookie('token', result.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      });
     }
     
     return result;
@@ -81,11 +92,22 @@ export class AuthController extends Controller {
   @Post('/verify-login-otp')
   @SuccessResponse(200, 'Login successful')
   @Response(400, 'Invalid OTP or login failed')
-  public async verifyLoginOTP(@Body() requestBody: VerifyOTPRequest): Promise<VerifyOTPResponse> {
+  public async verifyLoginOTP(
+    @Body() requestBody: VerifyOTPRequest,
+    @Request() request: any
+  ): Promise<VerifyOTPResponse> {
     const result = await authService.verifyLoginOTP(requestBody.email, requestBody.otp);
     
     if (!result.success) {
       this.setStatus(400);
+    } else if (result.token && request.res) {
+      // Set cookie if token is present
+      request.res.cookie('token', result.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      });
     }
     
     return result;
@@ -142,9 +164,16 @@ export class AuthController extends Controller {
    */
   @Post('/logout')
   @SuccessResponse(200, 'Logged out successfully')
-  public async logout(): Promise<AuthResponse> {
-    // Since we're using stateless JWT tokens, logout is handled on the client side
-    // In a production app, you might want to implement token blacklisting
+  public async logout(@Request() request: any): Promise<AuthResponse> {
+    // Clear the cookie
+    if (request.res) {
+      request.res.clearCookie('token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax'
+      });
+    }
+    
     return {
       success: true,
       message: 'Logged out successfully'

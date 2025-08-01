@@ -16,7 +16,7 @@ async function generateDocs(): Promise<void> {
     specVersion: 3,
     outputDirectory: "build",
     noImplicitAdditionalProperties: "throw-on-extras",
-    controllerPathGlobs: ["src/**/*Controller.ts"],
+    controllerPathGlobs: ["src/controllers/*Controller.ts"],
     securityDefinitions: {
       jwt: {
         type: "http",
@@ -40,7 +40,7 @@ async function generateDocs(): Promise<void> {
       // Set the base path for all routes
       servers: [
         {
-          url: "/api",
+          url: "/",
           description: "Default API server",
         },
       ],
@@ -49,10 +49,9 @@ async function generateDocs(): Promise<void> {
 
   await generateRoutes({
     entryFile: "src/app.ts",
-    routesDir: "build",
+    routesDir: "src/routes",
     noImplicitAdditionalProperties: "throw-on-extras",
-    controllerPathGlobs: ["src/**/*Controller.ts"],
-    // Add bodyCoercion property to satisfy the ExtendedRoutesConfig interface
+    controllerPathGlobs: ["src/controllers/*Controller.ts"],
     bodyCoercion: true,
   });
 
