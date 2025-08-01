@@ -6,13 +6,12 @@ WORKDIR /app
 
 # Install dependencies first for better caching
 COPY package*.json ./
-RUN npm ci --only=production
 
 # Copy source code
 COPY . .
 
-# Install development dependencies for building
-RUN npm ci
+# Install all dependencies (including dev dependencies)
+RUN npm install
 
 # Generate Prisma client
 RUN npx prisma generate

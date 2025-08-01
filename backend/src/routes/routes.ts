@@ -655,6 +655,36 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsSlotController_getAvailableSlots: Record<string, TsoaRoute.ParameterSchema> = {
+                vehicleType: {"in":"query","name":"vehicleType","dataType":"union","subSchemas":[{"dataType":"enum","enums":["CAR"]},{"dataType":"enum","enums":["BIKE"]},{"dataType":"enum","enums":["EV"]},{"dataType":"enum","enums":["HANDICAP_ACCESSIBLE"]}]},
+        };
+        app.get('/api/slots/available',
+            ...(fetchMiddlewares<RequestHandler>(SlotController)),
+            ...(fetchMiddlewares<RequestHandler>(SlotController.prototype.getAvailableSlots)),
+
+            async function SlotController_getAvailableSlots(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsSlotController_getAvailableSlots, request, response });
+
+                const controller = new SlotController();
+
+              await templateService.apiHandler({
+                methodName: 'getAvailableSlots',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsSlotController_getSlotById: Record<string, TsoaRoute.ParameterSchema> = {
                 slotId: {"in":"path","name":"slotId","required":true,"dataType":"string"},
         };
@@ -825,6 +855,36 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'releaseSlotMaintenance',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsSlotController_reserveSlot: Record<string, TsoaRoute.ParameterSchema> = {
+                slotId: {"in":"path","name":"slotId","required":true,"dataType":"string"},
+        };
+        app.post('/api/slots/:slotId/reserve',
+            ...(fetchMiddlewares<RequestHandler>(SlotController)),
+            ...(fetchMiddlewares<RequestHandler>(SlotController.prototype.reserveSlot)),
+
+            async function SlotController_reserveSlot(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsSlotController_reserveSlot, request, response });
+
+                const controller = new SlotController();
+
+              await templateService.apiHandler({
+                methodName: 'reserveSlot',
                 controller,
                 response,
                 next,

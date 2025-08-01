@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MotorQ - OTP Authentication",
+  title: "MOTORQ - OTP Authentication",
   description: "Secure OTP-based authentication system",
 };
 

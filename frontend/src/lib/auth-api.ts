@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -52,37 +52,37 @@ export interface AuthResponse {
 export const authApi = {
   // Send OTP for registration
   sendRegisterOTP: async (email: string): Promise<SendOTPResponse> => {
-    const response = await api.post('/api/auth/send-register-otp', { email });
+    const response = await api.post('/auth/send-register-otp', { email });
     return response.data;
   },
 
   // Verify OTP and register user
   verifyRegisterOTP: async (email: string, otp: string): Promise<VerifyOTPResponse> => {
-    const response = await api.post('/api/auth/verify-register-otp', { email, otp });
+    const response = await api.post('/auth/verify-register-otp', { email, otp });
     return response.data;
   },
 
   // Send OTP for login
   sendLoginOTP: async (email: string): Promise<SendOTPResponse> => {
-    const response = await api.post('/api/auth/send-login-otp', { email });
+    const response = await api.post('/auth/send-login-otp', { email });
     return response.data;
   },
 
   // Verify OTP and login user
   verifyLoginOTP: async (email: string, otp: string): Promise<VerifyOTPResponse> => {
-    const response = await api.post('/api/auth/verify-login-otp', { email, otp });
+    const response = await api.post('/auth/verify-login-otp', { email, otp });
     return response.data;
   },
 
   // Get current user
   getCurrentUser: async (): Promise<AuthResponse> => {
-    const response = await api.get('/api/auth/me');
+    const response = await api.get('/auth/me');
     return response.data;
   },
 
   // Logout user
   logout: async (): Promise<AuthResponse> => {
-    const response = await api.post('/api/auth/logout');
+    const response = await api.post('/auth/logout');
     return response.data;
   },
 };

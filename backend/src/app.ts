@@ -27,7 +27,8 @@ setupDocumentation(app);
 const corsOptions = {
   origin: [
     process.env.FRONTEND_URL || "http://localhost:3000",
-    "http://localhost:3001"
+    "http://localhost:3001",
+    "http://localhost:3002"
   ],
   credentials: true,
   optionsSuccessStatus: 200, // Some legacy browsers (IE11, various SmartTVs) choke on 204

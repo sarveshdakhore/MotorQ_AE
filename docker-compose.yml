@@ -46,7 +46,6 @@ services:
     restart: unless-stopped
     ports:
       - "8001:8001"
-      - "5555:5555"
     volumes:
       - ./backend/src:/app/src
       - ./backend/prisma:/app/prisma
@@ -70,7 +69,32 @@ services:
         condition: service_healthy
     networks:
       - motorq_network
-    command: sh -c "npx prisma migrate deploy && npm run dev"
+    command: sh -c "npm install && npx prisma migrate deploy && npx prisma generate && npm run dev"
+
+  # Prisma Studio
+  prisma-studio:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: motorq_prisma_studio
+    restart: unless-stopped
+    ports:
+      - "5555:5555"
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/prisma:/app/prisma
+      - ./backend/package.json:/app/package.json
+      - ./backend/tsconfig.json:/app/tsconfig.json
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@postgres:5432/motorq_db?schema=public"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    networks:
+      - motorq_network
+    command: sh -c "npm install && npx prisma generate && npx prisma studio --port 5555 --hostname 0.0.0.0"
 
 volumes:
   postgres_data:

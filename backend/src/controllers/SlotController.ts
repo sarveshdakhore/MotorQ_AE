@@ -103,6 +103,27 @@ export class SlotController extends Controller {
   }
 
   /**
+   * Get available slots
+   * @summary Get all available slots, optionally filtered by vehicle type compatibility
+   */
+  @Get('/available')
+  @SuccessResponse(200, 'Available slots retrieved successfully')
+  public async getAvailableSlots(
+    @Query() vehicleType?: 'CAR' | 'BIKE' | 'EV' | 'HANDICAP_ACCESSIBLE'
+  ): Promise<SlotResponse> {
+    try {
+      const result = await slotService.getAvailableSlots(vehicleType as any);
+      return result;
+    } catch (error) {
+      this.setStatus(500);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to retrieve available slots'
+      };
+    }
+  }
+
+  /**
    * Get slot by ID
    * @summary Get specific slot details
    */
@@ -251,6 +272,30 @@ export class SlotController extends Controller {
       };
     }
   }
+
+  /**
+   * Reserve slot for manual assignment
+   * @summary Reserve a specific slot for manual assignment with row locking
+   */
+  @Post('/{slotId}/reserve')
+  @SuccessResponse(200, 'Slot reserved successfully')
+  @Response(409, 'Slot no longer available')
+  public async reserveSlot(@Path() slotId: string): Promise<SlotResponse> {
+    try {
+      const result = await slotService.reserveSlotForAssignment(slotId);
+      if (!result.success) {
+        this.setStatus(409);
+      }
+      return result;
+    } catch (error) {
+      this.setStatus(500);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to reserve slot'
+      };
+    }
+  }
+
 
   /**
    * Bulk create slots

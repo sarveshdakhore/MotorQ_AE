@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -29,31 +29,31 @@ export interface UpdateUserRequest {
 export const userApi = {
   // Get all users
   getAllUsers: async (): Promise<UserResponse[]> => {
-    const response = await api.get('/api/users');
+    const response = await api.get('/users');
     return response.data;
   },
 
   // Get user by ID
   getUserById: async (userId: string): Promise<UserResponse> => {
-    const response = await api.get(`/api/users/${userId}`);
+    const response = await api.get(`/users/${userId}`);
     return response.data;
   },
 
   // Create a new user
   createUser: async (data: CreateUserRequest): Promise<UserResponse> => {
-    const response = await api.post('/api/users', data);
+    const response = await api.post('/users', data);
     return response.data;
   },
 
   // Update user by ID
   updateUser: async (userId: string, data: UpdateUserRequest): Promise<UserResponse> => {
-    const response = await api.put(`/api/users/${userId}`, data);
+    const response = await api.put(`/users/${userId}`, data);
     return response.data;
   },
 
   // Delete user by ID
   deleteUser: async (userId: string): Promise<void> => {
-    await api.delete(`/api/users/${userId}`);
+    await api.delete(`/users/${userId}`);
   },
 };
 

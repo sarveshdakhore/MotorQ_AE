@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { VehicleType, BillingType, SlotStatus, SessionStatus, SlotType } from '@prisma/client';
+import { slotService } from './slotService';
 
 const prisma = new PrismaClient();
 
@@ -46,37 +47,36 @@ class ParkingService {
         };
       }
 
-      let assignedSlot;
+      let slotAssignmentResult;
 
       if (data.slotId) {
-        // Manual slot assignment
-        assignedSlot = await prisma.parkingSlot.findUnique({
-          where: { id: data.slotId }
-        });
-
-        if (!assignedSlot) {
+        // Manual slot assignment with row locking
+        slotAssignmentResult = await slotService.reserveSlotForAssignment(data.slotId);
+        
+        if (!slotAssignmentResult.success) {
           return {
             success: false,
-            message: 'Selected slot not found'
-          };
-        }
-
-        if (assignedSlot.status !== SlotStatus.AVAILABLE) {
-          return {
-            success: false,
-            message: 'Selected slot is not available'
+            message: slotAssignmentResult.message || 'Failed to reserve selected slot'
           };
         }
       } else {
-        // Auto slot assignment
-        assignedSlot = await this.findBestAvailableSlot(data.vehicleType);
+        // Auto slot assignment with fallback logic and row locking
+        slotAssignmentResult = await slotService.autoAssignSlot(data.vehicleType);
         
-        if (!assignedSlot) {
+        if (!slotAssignmentResult.success) {
           return {
             success: false,
-            message: `No available slots for ${data.vehicleType} vehicles`
+            message: slotAssignmentResult.message || `No available slots for ${data.vehicleType} vehicles`
           };
         }
+      }
+
+      const assignedSlot = slotAssignmentResult.slot;
+      if (!assignedSlot) {
+        return {
+          success: false,
+          message: 'Failed to get slot assignment details'
+        };
       }
 
       // Create or get vehicle
@@ -93,8 +93,20 @@ class ParkingService {
         });
       }
 
-      // Create parking session and update slot status
+      // Create parking session and update slot status with enhanced transaction handling
       const session = await prisma.$transaction(async (tx) => {
+        // Double-check slot is still available before final assignment
+        const currentSlot = await tx.parkingSlot.findFirst({
+          where: { 
+            id: assignedSlot.id,
+            status: SlotStatus.AVAILABLE 
+          }
+        });
+
+        if (!currentSlot) {
+          throw new Error('Slot is no longer available - please try again');
+        }
+
         // Update slot status
         await tx.parkingSlot.update({
           where: { id: assignedSlot.id },
@@ -114,6 +126,9 @@ class ParkingService {
             slot: true
           }
         });
+      }, {
+        timeout: 10000,  // 10 second timeout for the entire transaction
+        isolationLevel: 'ReadCommitted'
       });
 
       return {
@@ -430,24 +445,6 @@ class ParkingService {
     }
   }
 
-  private async findBestAvailableSlot(vehicleType: VehicleType) {
-    const slotTypeMapping = {
-      [VehicleType.CAR]: [SlotType.REGULAR, SlotType.COMPACT],
-      [VehicleType.BIKE]: [SlotType.REGULAR],
-      [VehicleType.EV]: [SlotType.EV],
-      [VehicleType.HANDICAP_ACCESSIBLE]: [SlotType.HANDICAP_ACCESSIBLE]
-    };
-
-    const compatibleSlotTypes = slotTypeMapping[vehicleType];
-
-    return await prisma.parkingSlot.findFirst({
-      where: {
-        status: SlotStatus.AVAILABLE,
-        slotType: { in: compatibleSlotTypes }
-      },
-      orderBy: { slotNumber: 'asc' }
-    });
-  }
 
   private formatDuration(milliseconds: number): string {
     const hours = Math.floor(milliseconds / (1000 * 60 * 60));

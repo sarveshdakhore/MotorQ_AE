@@ -42,17 +42,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const checkAuth = async () => {
     try {
       setLoading(true);
-      const response = await authApi.getCurrentUser();
-      if (response.success && response.user) {
-        setUser(response.user);
-      } else {
-        setUser(null);
-      }
+      // Skip authentication - always set a dummy user for open access
+      setUser({
+        id: 'anonymous',
+        email: 'anonymous@parking.com',
+        createdAt: new Date().toISOString()
+      });
     } catch (error: any) {
-      // Don't log 401 errors as they're expected when not authenticated
-      if (error.response?.status !== 401) {
-        console.error('Auth check failed:', error);
-      }
+      console.error('Auth check failed:', error);
       setUser(null);
     } finally {
       setLoading(false);

@@ -14,6 +14,7 @@ export const authMiddleware = async (
   next: NextFunction
 ): Promise<void> => {
   try {
+    next();
     const token = req.cookies?.token || req.headers.authorization?.replace('Bearer ', '');
 
     if (!token) {
@@ -48,7 +49,7 @@ export const authMiddleware = async (
       email: decoded.email
     };
 
-    next();
+    
   } catch (error) {
     console.error('Auth middleware error:', error);
     res.status(500).json({
