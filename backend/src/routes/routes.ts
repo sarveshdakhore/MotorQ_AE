@@ -23,8 +23,11 @@ import { BillingController } from './../controllers/BillingController';
 import { AuthController } from './../controllers/AuthController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { AnalyticsController } from './../controllers/AnalyticsController';
+import { expressAuthentication } from './../middleware/tsoaAuthMiddleware';
+// @ts-ignore - no great way to install types from subpackage
 import type { Request as ExRequest, Response as ExResponse, RequestHandler, Router } from 'express';
 
+const expressAuthenticationRecasted = expressAuthentication as (req: ExRequest, securityName: string, scopes?: string[], res?: ExResponse) => Promise<any>;
 
 
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -166,15 +169,6 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "SearchVehicleResponse": {
-        "dataType": "refObject",
-        "properties": {
-            "success": {"dataType":"boolean","required":true},
-            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"parkingHistory":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"duration":{"dataType":"string","required":true},"billingAmount":{"dataType":"double","required":true},"exitTime":{"dataType":"union","subSchemas":[{"dataType":"datetime"},{"dataType":"enum","enums":[null]}],"required":true},"entryTime":{"dataType":"datetime","required":true},"slotNumber":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}}},"required":true},"currentSession":{"dataType":"nestedObjectLiteral","nestedProperties":{"status":{"dataType":"string","required":true},"billingType":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["HOURLY"]},{"dataType":"enum","enums":["DAY_PASS"]}],"required":true},"entryTime":{"dataType":"datetime","required":true},"slotNumber":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}}},"vehicle":{"dataType":"nestedObjectLiteral","nestedProperties":{"vehicleType":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["CAR"]},{"dataType":"enum","enums":["BIKE"]},{"dataType":"enum","enums":["EV"]},{"dataType":"enum","enums":["HANDICAP_ACCESSIBLE"]}],"required":true},"numberPlate":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}},"required":true}}},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "VehicleExitResponse": {
         "dataType": "refObject",
         "properties": {
@@ -189,6 +183,15 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "numberPlate": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "SearchVehicleResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"parkingHistory":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"duration":{"dataType":"string","required":true},"billingAmount":{"dataType":"double","required":true},"exitTime":{"dataType":"union","subSchemas":[{"dataType":"datetime"},{"dataType":"enum","enums":[null]}],"required":true},"entryTime":{"dataType":"datetime","required":true},"slotNumber":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}}},"required":true},"currentSession":{"dataType":"nestedObjectLiteral","nestedProperties":{"status":{"dataType":"string","required":true},"billingType":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["HOURLY"]},{"dataType":"enum","enums":["DAY_PASS"]}],"required":true},"entryTime":{"dataType":"datetime","required":true},"slotNumber":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}}},"vehicle":{"dataType":"nestedObjectLiteral","nestedProperties":{"vehicleType":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["CAR"]},{"dataType":"enum","enums":["BIKE"]},{"dataType":"enum","enums":["EV"]},{"dataType":"enum","enums":["HANDICAP_ACCESSIBLE"]}],"required":true},"numberPlate":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}},"required":true}}},
         },
         "additionalProperties": false,
     },
@@ -326,7 +329,8 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "email": {"dataType":"string","required":true},
-            "otp": {"dataType":"string","required":true},
+            "otp": {"dataType":"string"},
+            "password": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
@@ -337,6 +341,7 @@ const models: TsoaRoute.Models = {
             "id": {"dataType":"string","required":true},
             "email": {"dataType":"string","required":true},
             "createdAt": {"dataType":"datetime","required":true},
+            "role": {"dataType":"string"},
         },
         "additionalProperties": false,
     },
@@ -531,6 +536,7 @@ export function RegisterRoutes(app: Router) {
         const argsSystemController_getEnums: Record<string, TsoaRoute.ParameterSchema> = {
         };
         app.get('/api/system/enums',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SystemController)),
             ...(fetchMiddlewares<RequestHandler>(SystemController.prototype.getEnums)),
 
@@ -560,6 +566,7 @@ export function RegisterRoutes(app: Router) {
         const argsSystemController_getSystemConfig: Record<string, TsoaRoute.ParameterSchema> = {
         };
         app.get('/api/system/config',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SystemController)),
             ...(fetchMiddlewares<RequestHandler>(SystemController.prototype.getSystemConfig)),
 
@@ -589,6 +596,7 @@ export function RegisterRoutes(app: Router) {
         const argsSystemController_getVehicleTypes: Record<string, TsoaRoute.ParameterSchema> = {
         };
         app.get('/api/system/vehicle-types',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SystemController)),
             ...(fetchMiddlewares<RequestHandler>(SystemController.prototype.getVehicleTypes)),
 
@@ -618,6 +626,7 @@ export function RegisterRoutes(app: Router) {
         const argsSystemController_getSlotTypes: Record<string, TsoaRoute.ParameterSchema> = {
         };
         app.get('/api/system/slot-types',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SystemController)),
             ...(fetchMiddlewares<RequestHandler>(SystemController.prototype.getSlotTypes)),
 
@@ -647,6 +656,7 @@ export function RegisterRoutes(app: Router) {
         const argsSystemController_getBillingTypes: Record<string, TsoaRoute.ParameterSchema> = {
         };
         app.get('/api/system/billing-types',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SystemController)),
             ...(fetchMiddlewares<RequestHandler>(SystemController.prototype.getBillingTypes)),
 
@@ -680,6 +690,7 @@ export function RegisterRoutes(app: Router) {
                 limit: {"default":50,"in":"query","name":"limit","dataType":"double"},
         };
         app.get('/api/slots',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SlotController)),
             ...(fetchMiddlewares<RequestHandler>(SlotController.prototype.getSlots)),
 
@@ -709,6 +720,7 @@ export function RegisterRoutes(app: Router) {
         const argsSlotController_getAvailabilityMap: Record<string, TsoaRoute.ParameterSchema> = {
         };
         app.get('/api/slots/availability-map',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SlotController)),
             ...(fetchMiddlewares<RequestHandler>(SlotController.prototype.getAvailabilityMap)),
 
@@ -739,6 +751,7 @@ export function RegisterRoutes(app: Router) {
                 vehicleType: {"in":"query","name":"vehicleType","dataType":"union","subSchemas":[{"dataType":"enum","enums":["CAR"]},{"dataType":"enum","enums":["BIKE"]},{"dataType":"enum","enums":["EV"]},{"dataType":"enum","enums":["HANDICAP_ACCESSIBLE"]}]},
         };
         app.get('/api/slots/available',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SlotController)),
             ...(fetchMiddlewares<RequestHandler>(SlotController.prototype.getAvailableSlots)),
 
@@ -769,6 +782,7 @@ export function RegisterRoutes(app: Router) {
                 slotId: {"in":"path","name":"slotId","required":true,"dataType":"string"},
         };
         app.get('/api/slots/:slotId',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SlotController)),
             ...(fetchMiddlewares<RequestHandler>(SlotController.prototype.getSlotById)),
 
@@ -799,6 +813,7 @@ export function RegisterRoutes(app: Router) {
                 requestBody: {"in":"body","name":"requestBody","required":true,"ref":"CreateSlotRequest"},
         };
         app.post('/api/slots',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SlotController)),
             ...(fetchMiddlewares<RequestHandler>(SlotController.prototype.createSlot)),
 
@@ -830,6 +845,7 @@ export function RegisterRoutes(app: Router) {
                 requestBody: {"in":"body","name":"requestBody","required":true,"ref":"UpdateSlotRequest"},
         };
         app.put('/api/slots/:slotId',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SlotController)),
             ...(fetchMiddlewares<RequestHandler>(SlotController.prototype.updateSlot)),
 
@@ -856,40 +872,11 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsSlotController_autoAssignSlot: Record<string, TsoaRoute.ParameterSchema> = {
-                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"AutoAssignRequest"},
-        };
-        app.post('/api/slots/auto-assign',
-            ...(fetchMiddlewares<RequestHandler>(SlotController)),
-            ...(fetchMiddlewares<RequestHandler>(SlotController.prototype.autoAssignSlot)),
-
-            async function SlotController_autoAssignSlot(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsSlotController_autoAssignSlot, request, response });
-
-                const controller = new SlotController();
-
-              await templateService.apiHandler({
-                methodName: 'autoAssignSlot',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: 200,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsSlotController_setSlotMaintenance: Record<string, TsoaRoute.ParameterSchema> = {
                 slotId: {"in":"path","name":"slotId","required":true,"dataType":"string"},
         };
         app.post('/api/slots/:slotId/maintenance',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SlotController)),
             ...(fetchMiddlewares<RequestHandler>(SlotController.prototype.setSlotMaintenance)),
 
@@ -920,6 +907,7 @@ export function RegisterRoutes(app: Router) {
                 slotId: {"in":"path","name":"slotId","required":true,"dataType":"string"},
         };
         app.post('/api/slots/:slotId/release-maintenance',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SlotController)),
             ...(fetchMiddlewares<RequestHandler>(SlotController.prototype.releaseSlotMaintenance)),
 
@@ -946,10 +934,42 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsSlotController_autoAssignSlot: Record<string, TsoaRoute.ParameterSchema> = {
+                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"AutoAssignRequest"},
+        };
+        app.post('/api/slots/auto-assign',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(SlotController)),
+            ...(fetchMiddlewares<RequestHandler>(SlotController.prototype.autoAssignSlot)),
+
+            async function SlotController_autoAssignSlot(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsSlotController_autoAssignSlot, request, response });
+
+                const controller = new SlotController();
+
+              await templateService.apiHandler({
+                methodName: 'autoAssignSlot',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsSlotController_reserveSlot: Record<string, TsoaRoute.ParameterSchema> = {
                 slotId: {"in":"path","name":"slotId","required":true,"dataType":"string"},
         };
         app.post('/api/slots/:slotId/reserve',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SlotController)),
             ...(fetchMiddlewares<RequestHandler>(SlotController.prototype.reserveSlot)),
 
@@ -980,6 +1000,7 @@ export function RegisterRoutes(app: Router) {
                 requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"array","array":{"dataType":"refObject","ref":"CreateSlotRequest"}},
         };
         app.post('/api/slots/bulk',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SlotController)),
             ...(fetchMiddlewares<RequestHandler>(SlotController.prototype.bulkCreateSlots)),
 
@@ -1012,6 +1033,7 @@ export function RegisterRoutes(app: Router) {
                 limit: {"default":20,"in":"query","name":"limit","dataType":"double"},
         };
         app.get('/api/sessions/active',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SessionController)),
             ...(fetchMiddlewares<RequestHandler>(SessionController.prototype.getActiveSessions)),
 
@@ -1042,6 +1064,7 @@ export function RegisterRoutes(app: Router) {
                 sessionId: {"in":"path","name":"sessionId","required":true,"dataType":"string"},
         };
         app.get('/api/sessions/:sessionId',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SessionController)),
             ...(fetchMiddlewares<RequestHandler>(SessionController.prototype.getSessionById)),
 
@@ -1072,6 +1095,7 @@ export function RegisterRoutes(app: Router) {
                 numberPlate: {"in":"path","name":"numberPlate","required":true,"dataType":"string"},
         };
         app.get('/api/sessions/vehicle/:numberPlate',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SessionController)),
             ...(fetchMiddlewares<RequestHandler>(SessionController.prototype.getSessionByVehicle)),
 
@@ -1102,6 +1126,7 @@ export function RegisterRoutes(app: Router) {
                 requestBody: {"in":"body","name":"requestBody","required":true,"ref":"ExtendSessionRequest"},
         };
         app.post('/api/sessions/extend',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SessionController)),
             ...(fetchMiddlewares<RequestHandler>(SessionController.prototype.extendSession)),
 
@@ -1137,6 +1162,7 @@ export function RegisterRoutes(app: Router) {
                 limit: {"default":20,"in":"query","name":"limit","dataType":"double"},
         };
         app.get('/api/sessions/history',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SessionController)),
             ...(fetchMiddlewares<RequestHandler>(SessionController.prototype.getSessionHistory)),
 
@@ -1167,6 +1193,7 @@ export function RegisterRoutes(app: Router) {
                 sessionId: {"in":"path","name":"sessionId","required":true,"dataType":"string"},
         };
         app.get('/api/sessions/:sessionId/cost',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SessionController)),
             ...(fetchMiddlewares<RequestHandler>(SessionController.prototype.calculateSessionCost)),
 
@@ -1197,6 +1224,7 @@ export function RegisterRoutes(app: Router) {
                 sessionId: {"in":"path","name":"sessionId","required":true,"dataType":"string"},
         };
         app.post('/api/sessions/:sessionId/force-end',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SessionController)),
             ...(fetchMiddlewares<RequestHandler>(SessionController.prototype.forceEndSession)),
 
@@ -1227,6 +1255,7 @@ export function RegisterRoutes(app: Router) {
                 period: {"default":"day","in":"query","name":"period","dataType":"union","subSchemas":[{"dataType":"enum","enums":["day"]},{"dataType":"enum","enums":["week"]},{"dataType":"enum","enums":["month"]}]},
         };
         app.get('/api/sessions/stats',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SessionController)),
             ...(fetchMiddlewares<RequestHandler>(SessionController.prototype.getSessionStats)),
 
@@ -1257,6 +1286,7 @@ export function RegisterRoutes(app: Router) {
                 thresholdHours: {"default":24,"in":"query","name":"thresholdHours","dataType":"double"},
         };
         app.get('/api/sessions/overstay-alerts',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SessionController)),
             ...(fetchMiddlewares<RequestHandler>(SessionController.prototype.getOverstayAlerts)),
 
@@ -1287,6 +1317,7 @@ export function RegisterRoutes(app: Router) {
                 requestBody: {"in":"body","name":"requestBody","required":true,"ref":"VehicleEntryRequest"},
         };
         app.post('/api/parking/entry',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(ParkingController)),
             ...(fetchMiddlewares<RequestHandler>(ParkingController.prototype.registerVehicleEntry)),
 
@@ -1313,10 +1344,42 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsParkingController_registerVehicleExit: Record<string, TsoaRoute.ParameterSchema> = {
+                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"VehicleExitRequest"},
+        };
+        app.post('/api/parking/exit',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(ParkingController)),
+            ...(fetchMiddlewares<RequestHandler>(ParkingController.prototype.registerVehicleExit)),
+
+            async function ParkingController_registerVehicleExit(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsParkingController_registerVehicleExit, request, response });
+
+                const controller = new ParkingController();
+
+              await templateService.apiHandler({
+                methodName: 'registerVehicleExit',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsParkingController_searchVehicle: Record<string, TsoaRoute.ParameterSchema> = {
                 numberPlate: {"in":"path","name":"numberPlate","required":true,"dataType":"string"},
         };
         app.get('/api/parking/search/:numberPlate',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(ParkingController)),
             ...(fetchMiddlewares<RequestHandler>(ParkingController.prototype.searchVehicle)),
 
@@ -1347,6 +1410,7 @@ export function RegisterRoutes(app: Router) {
                 query: {"in":"query","name":"query","required":true,"dataType":"string"},
         };
         app.get('/api/parking/quick-search',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(ParkingController)),
             ...(fetchMiddlewares<RequestHandler>(ParkingController.prototype.quickSearch)),
 
@@ -1373,42 +1437,13 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsParkingController_registerVehicleExit: Record<string, TsoaRoute.ParameterSchema> = {
-                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"VehicleExitRequest"},
-        };
-        app.post('/api/parking/exit',
-            ...(fetchMiddlewares<RequestHandler>(ParkingController)),
-            ...(fetchMiddlewares<RequestHandler>(ParkingController.prototype.registerVehicleExit)),
-
-            async function ParkingController_registerVehicleExit(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsParkingController_registerVehicleExit, request, response });
-
-                const controller = new ParkingController();
-
-              await templateService.apiHandler({
-                methodName: 'registerVehicleExit',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: 200,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsParkingController_getCurrentlyParkedVehicles: Record<string, TsoaRoute.ParameterSchema> = {
                 vehicleType: {"in":"query","name":"vehicleType","dataType":"union","subSchemas":[{"dataType":"enum","enums":["CAR"]},{"dataType":"enum","enums":["BIKE"]},{"dataType":"enum","enums":["EV"]},{"dataType":"enum","enums":["HANDICAP_ACCESSIBLE"]}]},
                 page: {"default":1,"in":"query","name":"page","dataType":"double"},
                 limit: {"default":20,"in":"query","name":"limit","dataType":"double"},
         };
         app.get('/api/parking/current',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(ParkingController)),
             ...(fetchMiddlewares<RequestHandler>(ParkingController.prototype.getCurrentlyParkedVehicles)),
 
@@ -1443,6 +1478,7 @@ export function RegisterRoutes(app: Router) {
                 limit: {"default":20,"in":"query","name":"limit","dataType":"double"},
         };
         app.get('/api/parking/history',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(ParkingController)),
             ...(fetchMiddlewares<RequestHandler>(ParkingController.prototype.getParkingHistory)),
 
@@ -1474,6 +1510,7 @@ export function RegisterRoutes(app: Router) {
                 requestBody: {"in":"body","name":"requestBody","required":true,"ref":"SlotOverrideRequest"},
         };
         app.post('/api/parking/:sessionId/override-slot',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(ParkingController)),
             ...(fetchMiddlewares<RequestHandler>(ParkingController.prototype.overrideSlot)),
 
@@ -1652,6 +1689,7 @@ export function RegisterRoutes(app: Router) {
         const argsDashboardController_getDashboardStats: Record<string, TsoaRoute.ParameterSchema> = {
         };
         app.get('/api/dashboard/stats',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(DashboardController)),
             ...(fetchMiddlewares<RequestHandler>(DashboardController.prototype.getDashboardStats)),
 
@@ -1683,6 +1721,7 @@ export function RegisterRoutes(app: Router) {
                 endDate: {"in":"query","name":"endDate","dataType":"string"},
         };
         app.get('/api/dashboard/revenue',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(DashboardController)),
             ...(fetchMiddlewares<RequestHandler>(DashboardController.prototype.getRevenueStats)),
 
@@ -1712,6 +1751,7 @@ export function RegisterRoutes(app: Router) {
         const argsDashboardController_getActivityStats: Record<string, TsoaRoute.ParameterSchema> = {
         };
         app.get('/api/dashboard/activity',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(DashboardController)),
             ...(fetchMiddlewares<RequestHandler>(DashboardController.prototype.getActivityStats)),
 
@@ -1742,6 +1782,7 @@ export function RegisterRoutes(app: Router) {
                 period: {"default":"day","in":"query","name":"period","dataType":"union","subSchemas":[{"dataType":"enum","enums":["day"]},{"dataType":"enum","enums":["week"]},{"dataType":"enum","enums":["month"]}]},
         };
         app.get('/api/dashboard/occupancy-trends',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(DashboardController)),
             ...(fetchMiddlewares<RequestHandler>(DashboardController.prototype.getOccupancyTrends)),
 
@@ -1771,6 +1812,7 @@ export function RegisterRoutes(app: Router) {
         const argsDashboardController_getRealtimeUpdates: Record<string, TsoaRoute.ParameterSchema> = {
         };
         app.get('/api/dashboard/realtime',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(DashboardController)),
             ...(fetchMiddlewares<RequestHandler>(DashboardController.prototype.getRealtimeUpdates)),
 
@@ -1801,6 +1843,7 @@ export function RegisterRoutes(app: Router) {
                 slotType: {"in":"query","name":"slotType","dataType":"union","subSchemas":[{"dataType":"enum","enums":["REGULAR"]},{"dataType":"enum","enums":["COMPACT"]},{"dataType":"enum","enums":["EV"]},{"dataType":"enum","enums":["HANDICAP_ACCESSIBLE"]}]},
         };
         app.get('/api/dashboard/slot-availability',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(DashboardController)),
             ...(fetchMiddlewares<RequestHandler>(DashboardController.prototype.getSlotAvailability)),
 
@@ -2373,6 +2416,76 @@ export function RegisterRoutes(app: Router) {
 
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
+
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+    function authenticateMiddleware(security: TsoaRoute.Security[] = []) {
+        return async function runAuthenticationMiddleware(request: any, response: any, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            // keep track of failed auth attempts so we can hand back the most
+            // recent one.  This behavior was previously existing so preserving it
+            // here
+            const failedAttempts: any[] = [];
+            const pushAndRethrow = (error: any) => {
+                failedAttempts.push(error);
+                throw error;
+            };
+
+            const secMethodOrPromises: Promise<any>[] = [];
+            for (const secMethod of security) {
+                if (Object.keys(secMethod).length > 1) {
+                    const secMethodAndPromises: Promise<any>[] = [];
+
+                    for (const name in secMethod) {
+                        secMethodAndPromises.push(
+                            expressAuthenticationRecasted(request, name, secMethod[name], response)
+                                .catch(pushAndRethrow)
+                        );
+                    }
+
+                    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+                    secMethodOrPromises.push(Promise.all(secMethodAndPromises)
+                        .then(users => { return users[0]; }));
+                } else {
+                    for (const name in secMethod) {
+                        secMethodOrPromises.push(
+                            expressAuthenticationRecasted(request, name, secMethod[name], response)
+                                .catch(pushAndRethrow)
+                        );
+                    }
+                }
+            }
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            try {
+                request['user'] = await Promise.any(secMethodOrPromises);
+
+                // Response was sent in middleware, abort
+                if (response.writableEnded) {
+                    return;
+                }
+
+                next();
+            }
+            catch(err) {
+                // Show most recent error as response
+                const error = failedAttempts.pop();
+                error.status = error.status || 401;
+
+                // Response was sent in middleware, abort
+                if (response.writableEnded) {
+                    return;
+                }
+                next(error);
+            }
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        }
+    }
 
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 }

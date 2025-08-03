@@ -14,7 +14,7 @@ redis.connect().catch(console.error);
 
 export class AuthService {
   private readonly JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key';
-  private readonly JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+  private readonly JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '5m';
   private readonly OTP_EXPIRY = 300; // 5 minutes
 
   async sendRegisterOTP(email: string): Promise<SendOTPResponse> {
@@ -381,6 +381,7 @@ export class AuthService {
     try {
       const decoded = jwt.verify(token, this.JWT_SECRET) as JWTPayload;
       return decoded;
+
     } catch (error) {
       console.error('Error verifying token:', error);
       return null;

@@ -52,6 +52,7 @@ async function generateDocs(): Promise<void> {
     routesDir: "src/routes",
     noImplicitAdditionalProperties: "throw-on-extras",
     controllerPathGlobs: ["src/controllers/*Controller.ts"],
+    authenticationModule: "src/middleware/tsoaAuthMiddleware.ts",
     bodyCoercion: true,
   });
 

@@ -9,7 +9,6 @@ export enum UserRole {
 export const requireRole = (allowedRoles: UserRole[]) => {
   return async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      // Ensure user is authenticated
       if (!req.user) {
         res.status(401).json({
           success: false,
@@ -18,7 +17,6 @@ export const requireRole = (allowedRoles: UserRole[]) => {
         return;
       }
 
-      // Check if user has required role with fallback to OPERATOR
       const userRole = (req.user.role as UserRole) || UserRole.OPERATOR;
       
       if (!allowedRoles.includes(userRole)) {
