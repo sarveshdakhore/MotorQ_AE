@@ -9,10 +9,14 @@ import {
   Response,
   SuccessResponse,
   Query,
-  Path
+  Path,
+  Security,
+  Middlewares
 } from 'tsoa';
 import { SessionStatus, VehicleType, BillingType } from '@prisma/client';
 import { sessionService } from '../services/sessionService';
+import { authMiddleware } from '../middleware/authMiddleware';
+import { requireOperator, requireAdmin } from '../middleware/roleMiddleware';
 
 interface ExtendSessionRequest {
   sessionId: string;
@@ -40,14 +44,18 @@ interface SessionSummary {
 
 @Route('api/sessions')
 @Tags('Sessions')
+@Security('jwt')
+@Middlewares([authMiddleware])
 export class SessionController extends Controller {
 
   /**
-   * Get all active sessions
+   * Get all active sessions (Operator & Admin)
    * @summary Get all currently active parking sessions
    */
   @Get('/active')
+  @Middlewares([requireOperator])
   @SuccessResponse(200, 'Active sessions retrieved successfully')
+  @Response(403, 'Access forbidden')
   public async getActiveSessions(
     @Query() vehicleType?: 'CAR' | 'BIKE' | 'EV' | 'HANDICAP_ACCESSIBLE',
     @Query() page: number = 1,
@@ -73,11 +81,13 @@ export class SessionController extends Controller {
   }
 
   /**
-   * Get session by ID
+   * Get session by ID (Operator & Admin)
    * @summary Get specific session details
    */
   @Get('/{sessionId}')
+  @Middlewares([requireOperator])
   @SuccessResponse(200, 'Session retrieved successfully')
+  @Response(403, 'Access forbidden')
   @Response(404, 'Session not found')
   public async getSessionById(@Path() sessionId: string): Promise<SessionResponse> {
     try {
@@ -103,11 +113,13 @@ export class SessionController extends Controller {
   }
 
   /**
-   * Get session by vehicle number plate
+   * Get session by vehicle (Operator & Admin)
    * @summary Get active session for a specific vehicle
    */
   @Get('/vehicle/{numberPlate}')
+  @Middlewares([requireOperator])
   @SuccessResponse(200, 'Session retrieved successfully')
+  @Response(403, 'Access forbidden')
   @Response(404, 'No active session found for vehicle')
   public async getSessionByVehicle(@Path() numberPlate: string): Promise<SessionResponse> {
     try {
@@ -133,11 +145,13 @@ export class SessionController extends Controller {
   }
 
   /**
-   * Extend session billing
+   * Extend session billing (Admin only)
    * @summary Extend parking session with additional billing
    */
   @Post('/extend')
+  @Middlewares([requireAdmin])
   @SuccessResponse(200, 'Session extended successfully')
+  @Response(403, 'Access forbidden - Admin only')
   @Response(404, 'Session not found or not active')
   public async extendSession(@Body() requestBody: ExtendSessionRequest): Promise<SessionResponse> {
     try {
@@ -159,11 +173,13 @@ export class SessionController extends Controller {
   }
 
   /**
-   * Get session history
+   * Get session history (Operator & Admin)
    * @summary Get parking session history with filters
    */
   @Get('/history')
+  @Middlewares([requireOperator])
   @SuccessResponse(200, 'Session history retrieved successfully')
+  @Response(403, 'Access forbidden')
   public async getSessionHistory(
     @Query() startDate?: string,
     @Query() endDate?: string,
@@ -195,11 +211,13 @@ export class SessionController extends Controller {
   }
 
   /**
-   * Calculate session cost
+   * Calculate session cost (Operator & Admin)
    * @summary Calculate current cost for an active session
    */
   @Get('/{sessionId}/cost')
+  @Middlewares([requireOperator])
   @SuccessResponse(200, 'Session cost calculated successfully')
+  @Response(403, 'Access forbidden')
   @Response(404, 'Session not found')
   public async calculateSessionCost(@Path() sessionId: string): Promise<SessionResponse> {
     try {
@@ -218,11 +236,13 @@ export class SessionController extends Controller {
   }
 
   /**
-   * Force end session
+   * Force end session (Admin only)
    * @summary Force end a session (admin function)
    */
   @Post('/{sessionId}/force-end')
+  @Middlewares([requireAdmin])
   @SuccessResponse(200, 'Session ended successfully')
+  @Response(403, 'Access forbidden - Admin only')
   @Response(404, 'Session not found or already ended')
   public async forceEndSession(@Path() sessionId: string): Promise<SessionResponse> {
     try {
@@ -241,11 +261,13 @@ export class SessionController extends Controller {
   }
 
   /**
-   * Get session statistics
+   * Get session statistics (Admin only)
    * @summary Get statistics about parking sessions
    */
   @Get('/stats')
+  @Middlewares([requireAdmin])
   @SuccessResponse(200, 'Session statistics retrieved successfully')
+  @Response(403, 'Access forbidden - Admin only')
   public async getSessionStats(
     @Query() period: 'day' | 'week' | 'month' = 'day'
   ): Promise<SessionResponse> {
@@ -265,11 +287,13 @@ export class SessionController extends Controller {
   }
 
   /**
-   * Get overstay alerts
+   * Get overstay alerts (Operator & Admin)
    * @summary Get sessions that have exceeded expected duration
    */
   @Get('/overstay-alerts')
+  @Middlewares([requireOperator])
   @SuccessResponse(200, 'Overstay alerts retrieved successfully')
+  @Response(403, 'Access forbidden')
   public async getOverstayAlerts(
     @Query() thresholdHours: number = 24
   ): Promise<SessionResponse> {

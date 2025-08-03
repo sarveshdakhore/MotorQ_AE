@@ -1,7 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import jwt, { SignOptions } from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 import { createClient } from 'redis';
-import { SendOTPResponse, VerifyOTPResponse, AuthUser, JWTPayload } from '../types/auth.types';
+import { SendOTPResponse, VerifyOTPResponse, AuthUser, JWTPayload, PasswordAuthResponse } from '../types/auth.types';
 
 const prisma = new PrismaClient();
 const redis = createClient({
@@ -147,33 +148,84 @@ export class AuthService {
     }
   }
 
-  async verifyLoginOTP(email: string, otp: string): Promise<VerifyOTPResponse> {
+  async getUserById(userId: string): Promise<AuthUser | null> {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          isActive: true,
+          createdAt: true,
+          updatedAt: true
+          // Removed password from select to avoid field not found errors
+        }
+      });
+
+      if (!user) {
+        return null;
+      }
+
+      return {
+        id: user.id,
+        email: user.email,
+        createdAt: user.createdAt,
+        role: user.role
+      };
+    } catch (error) {
+      console.error('Error getting user by ID:', error);
+      return null;
+    }
+  }
+
+  async verifyLoginOTP(email: string, password: string): Promise<VerifyOTPResponse> {
     try {
       // Check if user exists
       const user = await prisma.user.findUnique({
-        where: { email }
+        where: { email },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          isActive: true,
+          createdAt: true,
+          updatedAt: true,
+          password: true
+        }
       });
 
       if (!user) {
         return {
           success: false,
-          message: 'User not found with this email'
+          message: 'Invalid credentials'
         };
       }
 
-      // Verify OTP
-      const otpKey = `otp:login:${email}`;
-      const storedOTP = await redis.get(otpKey);
-
-      if (!storedOTP || storedOTP !== otp) {
+      // Handle case where password field might not exist
+      if (!user.password) {
         return {
           success: false,
-          message: 'Invalid or expired OTP'
+          message: 'Password authentication not available for this account'
         };
       }
 
-      // Delete OTP after successful verification
-      await redis.del(otpKey);
+      if (!user.isActive) {
+        return {
+          success: false,
+          message: 'Account is deactivated'
+        };
+      }
+
+      // Verify password
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+
+      if (!isPasswordValid) {
+        return {
+          success: false,
+          message: 'Invalid credentials'
+        };
+      }
 
       // Generate JWT token
       const token = this.generateToken(user.id, user.email);
@@ -189,32 +241,128 @@ export class AuthService {
         token
       };
     } catch (error) {
-      console.error('Error verifying login OTP:', error);
+      console.error('Error verifying login password:', error);
       return {
         success: false,
-        message: 'Failed to verify OTP'
+        message: 'Failed to verify credentials'
       };
     }
   }
 
-  async getUserById(userId: string): Promise<AuthUser | null> {
+  async registerWithPassword(email: string, password: string): Promise<PasswordAuthResponse> {
     try {
+      // Check if user already exists
+      const existingUser = await prisma.user.findUnique({
+        where: { email }
+      });
+
+      if (existingUser) {
+        return {
+          success: false,
+          message: 'User already exists with this email'
+        };
+      }
+
+      // Hash password
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      // Create user
+      const user = await prisma.user.create({
+        data: {
+          email,
+          password: hashedPassword
+        }
+      });
+
+      // Generate JWT token
+      const token = this.generateToken(user.id, user.email);
+
+      return {
+        success: true,
+        message: 'Registration successful',
+        user: {
+          id: user.id,
+          email: user.email,
+          createdAt: user.createdAt
+        },
+        token
+      };
+    } catch (error) {
+      console.error('Error registering with password:', error);
+      return {
+        success: false,
+        message: 'Registration failed'
+      };
+    }
+  }
+
+  async loginWithPassword(email: string, password: string): Promise<PasswordAuthResponse> {
+    try {
+      // Check if user exists
       const user = await prisma.user.findUnique({
-        where: { id: userId }
+        where: { email },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          isActive: true,
+          createdAt: true,
+          updatedAt: true,
+          password: true
+        }
       });
 
       if (!user) {
-        return null;
+        return {
+          success: false,
+          message: 'Invalid credentials'
+        };
       }
 
+      if (!user.password) {
+        return {
+          success: false,
+          message: 'Password authentication not available for this account'
+        };
+      }
+
+      if (!user.isActive) {
+        return {
+          success: false,
+          message: 'Account is deactivated'
+        };
+      }
+
+      // Verify password
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+
+      if (!isPasswordValid) {
+        return {
+          success: false,
+          message: 'Invalid credentials'
+        };
+      }
+
+      // Generate JWT token
+      const token = this.generateToken(user.id, user.email);
+
       return {
-        id: user.id,
-        email: user.email,
-        createdAt: user.createdAt
+        success: true,
+        message: 'Login successful',
+        user: {
+          id: user.id,
+          email: user.email,
+          createdAt: user.createdAt
+        },
+        token
       };
     } catch (error) {
-      console.error('Error getting user by ID:', error);
-      return null;
+      console.error('Error logging in with password:', error);
+      return {
+        success: false,
+        message: 'Login failed'
+      };
     }
   }
 

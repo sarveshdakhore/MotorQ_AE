@@ -31,7 +31,7 @@ const corsOptions = {
     "http://localhost:3002"
   ],
   credentials: true,
-  optionsSuccessStatus: 200, // Some legacy browsers (IE11, various SmartTVs) choke on 204
+  optionsSuccessStatus: 200,
 };
 
 app.use(cors(corsOptions));
@@ -56,13 +56,8 @@ app.use((err: any, req: any, res: any, next: any): void => {
   next(err);
 });
 
-// Documentation protection middleware (blocks /docs in production unless enabled)
+// Documentation protection middleware
 app.use(protectDocumentation());
-
-// Rate limiting disabled for development
-// app.use('/api/auth/send-register-otp', otpRateLimit);
-// app.use('/api/auth/send-login-otp', otpRateLimit);
-// app.use('/api/auth', authRateLimit);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

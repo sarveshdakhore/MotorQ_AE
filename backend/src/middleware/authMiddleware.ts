@@ -5,6 +5,7 @@ export interface AuthRequest extends Request {
   user?: {
     userId: string;
     email: string;
+    role?: string; 
   };
 }
 
@@ -14,7 +15,6 @@ export const authMiddleware = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    next();
     const token = req.cookies?.token || req.headers.authorization?.replace('Bearer ', '');
 
     if (!token) {
@@ -34,7 +34,7 @@ export const authMiddleware = async (
       return;
     }
 
-    // Verify user still exists
+    // Verify user still exists and get role
     const user = await authService.getUserById(decoded.userId);
     if (!user) {
       res.status(401).json({
@@ -46,10 +46,11 @@ export const authMiddleware = async (
 
     req.user = {
       userId: decoded.userId,
-      email: decoded.email
+      email: decoded.email,
+      role: user.role 
     };
 
-    
+    next();
   } catch (error) {
     console.error('Auth middleware error:', error);
     res.status(500).json({

@@ -5,10 +5,14 @@ import {
   Tags,
   Response,
   SuccessResponse,
-  Query
+  Query,
+  Security,
+  Middlewares
 } from 'tsoa';
 import { SlotType, VehicleType } from '@prisma/client';
 import { dashboardService } from '../services/dashboardService';
+import { authMiddleware } from '../middleware/authMiddleware';
+import { requireOperator, requireAdmin } from '../middleware/roleMiddleware';
 
 interface DashboardStats {
   totalSlots: number;
@@ -52,14 +56,18 @@ interface ActivityStats {
 
 @Route('api/dashboard')
 @Tags('Dashboard')
+@Security('jwt')
+@Middlewares([authMiddleware])
 export class DashboardController extends Controller {
 
   /**
-   * Get dashboard statistics
+   * Get dashboard statistics (Operator & Admin)
    * @summary Get real-time parking statistics
    */
   @Get('/stats')
+  @Middlewares([requireOperator])
   @SuccessResponse(200, 'Dashboard statistics retrieved successfully')
+  @Response(403, 'Access forbidden')
   public async getDashboardStats(): Promise<{ success: boolean; data: DashboardStats }> {
     try {
       const stats = await dashboardService.getDashboardStats();
@@ -85,11 +93,13 @@ export class DashboardController extends Controller {
   }
 
   /**
-   * Get revenue statistics
+   * Get revenue statistics (Admin only)
    * @summary Get revenue statistics for different periods
    */
   @Get('/revenue')
+  @Middlewares([requireAdmin])
   @SuccessResponse(200, 'Revenue statistics retrieved successfully')
+  @Response(403, 'Access forbidden - Admin only')
   public async getRevenueStats(
     @Query() startDate?: string,
     @Query() endDate?: string
@@ -121,11 +131,13 @@ export class DashboardController extends Controller {
   }
 
   /**
-   * Get activity statistics
+   * Get activity statistics (Operator & Admin)
    * @summary Get parking activity statistics
    */
   @Get('/activity')
+  @Middlewares([requireOperator])
   @SuccessResponse(200, 'Activity statistics retrieved successfully')
+  @Response(403, 'Access forbidden')
   public async getActivityStats(): Promise<{ success: boolean; data: ActivityStats }> {
     try {
       const stats = await dashboardService.getActivityStats();
@@ -148,11 +160,13 @@ export class DashboardController extends Controller {
   }
 
   /**
-   * Get occupancy trends
+   * Get occupancy trends (Operator & Admin)
    * @summary Get occupancy trends over time
    */
   @Get('/occupancy-trends')
+  @Middlewares([requireOperator])
   @SuccessResponse(200, 'Occupancy trends retrieved successfully')
+  @Response(403, 'Access forbidden')
   public async getOccupancyTrends(
     @Query() period: 'day' | 'week' | 'month' = 'day'
   ): Promise<{ success: boolean; data: any[] }> {
@@ -172,11 +186,13 @@ export class DashboardController extends Controller {
   }
 
   /**
-   * Get real-time updates
+   * Get real-time updates (Operator & Admin)
    * @summary Get real-time parking updates for live dashboard
    */
   @Get('/realtime')
+  @Middlewares([requireOperator])
   @SuccessResponse(200, 'Real-time updates retrieved successfully')
+  @Response(403, 'Access forbidden')
   public async getRealtimeUpdates(): Promise<{ success: boolean; data: any }> {
     try {
       const updates = await dashboardService.getRealtimeUpdates();
@@ -199,11 +215,13 @@ export class DashboardController extends Controller {
   }
 
   /**
-   * Get slot availability summary
+   * Get slot availability summary (Operator & Admin)
    * @summary Get detailed slot availability by type and location
    */
   @Get('/slot-availability')
+  @Middlewares([requireOperator])
   @SuccessResponse(200, 'Slot availability retrieved successfully')
+  @Response(403, 'Access forbidden')
   public async getSlotAvailability(
     @Query() slotType?: 'REGULAR' | 'COMPACT' | 'EV' | 'HANDICAP_ACCESSIBLE'
   ): Promise<{ success: boolean; data: any }> {

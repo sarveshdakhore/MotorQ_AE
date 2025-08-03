@@ -23,6 +23,7 @@ import { Request as ExpressRequest } from 'express';
 @Tags('Authentication')
 export class AuthController extends Controller {
 
+
   /**
    * Send OTP for user registration
    * @summary Send OTP to email for registration
@@ -51,7 +52,7 @@ export class AuthController extends Controller {
     @Body() requestBody: VerifyOTPRequest,
     @Request() request: any
   ): Promise<VerifyOTPResponse> {
-    const result = await authService.verifyRegisterOTP(requestBody.email, requestBody.otp);
+    const result = await authService.verifyRegisterOTP(requestBody.email, requestBody.password);
     
     if (!result.success) {
       this.setStatus(400);
@@ -85,18 +86,20 @@ export class AuthController extends Controller {
     return result;
   }
 
+  
+
   /**
    * Verify OTP and login user
    * @summary Verify login OTP and authenticate user
    */
   @Post('/verify-login-otp')
   @SuccessResponse(200, 'Login successful')
-  @Response(400, 'Invalid OTP or login failed')
+  @Response(400, 'Invalid Pass or login failed')
   public async verifyLoginOTP(
     @Body() requestBody: VerifyOTPRequest,
     @Request() request: any
   ): Promise<VerifyOTPResponse> {
-    const result = await authService.verifyLoginOTP(requestBody.email, requestBody.otp);
+    const result = await authService.verifyLoginOTP(requestBody.email, requestBody.password);
     
     if (!result.success) {
       this.setStatus(400);
@@ -106,7 +109,7 @@ export class AuthController extends Controller {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        maxAge:  5 * 60 * 1000 
       });
     }
     
